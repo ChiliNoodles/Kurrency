@@ -63,38 +63,3 @@ enum class CurrencyStyle {
     Standard,
     Iso
 }
-
-enum class CurrencyDisplayContext {
-    AudCentric,
-    Neutral
-}
-
-fun Currency.formatForAudCentricApp(
-    amount: String,
-    forceIso: Boolean = false
-): Result<String> {
-    return if (forceIso) {
-        formatAmount(amount, CurrencyStyle.Iso)
-    } else {
-        when (code) {
-            "AUD" -> formatAmount(amount, CurrencyStyle.Standard)
-            else -> formatAmount(amount, CurrencyStyle.Iso)
-        }
-    }
-}
-
-fun Currency.formatForAudCentricApp(
-    amount: Double,
-    forceIso: Boolean = false
-): Result<String> = formatForAudCentricApp(amount.toString(), forceIso)
-
-fun Currency.formatForAudCentricAppOrEmpty(
-    amount: String,
-    forceIso: Boolean = false
-): String = formatForAudCentricApp(amount, forceIso).getOrDefault("")
-
-fun Currency.formatForAudCentricAppOrEmpty(
-    amount: Double,
-    forceIso: Boolean = false
-): String = formatForAudCentricApp(amount, forceIso).getOrDefault("")
-
