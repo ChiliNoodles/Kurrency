@@ -2,15 +2,11 @@ package io.github.chilinoodles
 
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
-<<<<<<< HEAD
 import com.chilinoodles.kurrency.sample.App
-=======
->>>>>>> origin/main
-import kotlinx.browser.document
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-    ComposeViewport(document.body!!) {
+    ComposeViewport {
         App()
     }
 }

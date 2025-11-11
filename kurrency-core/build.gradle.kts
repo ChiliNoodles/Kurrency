@@ -1,5 +1,12 @@
-<<<<<<< HEAD
+@file:OptIn(ExperimentalWasmDsl::class)
+
+import org.gradle.kotlin.dsl.commonMain
+import org.gradle.kotlin.dsl.commonTest
+import org.gradle.kotlin.dsl.dependencies
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.internal.platform.wasm.WasmPlatforms.wasmJs
+import kotlin.text.set
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -16,18 +23,19 @@ kotlin {
             }
         }
     }
-    
+
     jvm()
-    
+
     wasmJs {
         browser()
+        outputModuleName.set("Kurrency")
     }
-    
+
     js(IR) {
         browser()
         nodejs()
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -39,7 +47,7 @@ kotlin {
             export(libs.cedar.logging)
         }
     }
-    
+
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -48,30 +56,30 @@ kotlin {
                 api(libs.cedar.logging)
             }
         }
-        
+
         val commonTest by getting {
             dependencies {
                 implementation(libs.kotlin.test)
             }
         }
-        
+
         val androidMain by getting {
             dependencies {
                 implementation("androidx.core:core-ktx:1.12.0")
             }
         }
-        
+
         val jvmMain by getting
-        
+
         val wasmJsMain by getting
         val jsMain by getting
-        
+
         val webMain by creating {
             dependsOn(commonMain)
             wasmJsMain.dependsOn(this)
             jsMain.dependsOn(this)
         }
-        
+
         val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
@@ -88,82 +96,13 @@ kotlin {
 android {
     namespace = "com.chilinoodles.kurrency"
     compileSdk = 36
-    
+
     defaultConfig {
         minSdk = 24
     }
-    
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 }
-=======
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-
-plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.maven.publish)
-}
-
-kotlin {
-    jvmToolchain(libs.versions.javaVersion.get().toInt())
-
-    androidTarget { publishLibraryVariants("release") }
-
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64(),
-    ).forEach {
-        it.binaries.framework {
-            baseName = "kurrency"
-            isStatic = true
-        }
-    }
-
-    jvm()
-
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        outputModuleName.set("Kurrency")
-        browser()
-        binaries.executable()
-    }
-
-    sourceSets {
-        commonMain.dependencies {
-            implementation(libs.kotlinx.coroutines.core)
-        }
-
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-            implementation(libs.kotlinx.coroutines.test)
-        }
-
-        androidMain.dependencies {
-            implementation(libs.kotlinx.coroutines.android)
-        }
-    }
-
-    //https://kotlinlang.org/docs/native-objc-interop.html#export-of-kdoc-comments-to-generated-objective-c-headers
-    targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
-        compilations["main"].compileTaskProvider.configure {
-            compilerOptions {
-                freeCompilerArgs.add("-Xexport-kdoc")
-            }
-        }
-    }
-
-}
-
-android {
-    namespace = "io.github.chilinoodles.kurrency"
-    compileSdk = libs.versions.compileSdk.get().toInt()
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-    }
-}
->>>>>>> origin/main
