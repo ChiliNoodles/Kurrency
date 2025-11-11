@@ -1,18 +1,14 @@
 @file:OptIn(ExperimentalWasmDsl::class)
 
-import org.gradle.kotlin.dsl.commonMain
-import org.gradle.kotlin.dsl.commonTest
-import org.gradle.kotlin.dsl.dependencies
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.internal.platform.wasm.WasmPlatforms.wasmJs
-import kotlin.text.set
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.maven.publish)
 }
 
 kotlin {
@@ -118,5 +114,44 @@ android {
 
     testOptions {
         unitTests.isIncludeAndroidResources = false
+    }
+}
+
+//Publishing your Kotlin Multiplatform library to Maven Central
+//https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
+    coordinates("io.github.chilinoodles", "kurrency", libs.versions.appVersionName.get())
+
+    pom {
+        name = "Kurrency"
+        description = "A Kotlin Multiplatform library for currency formatting and handling across Android, iOS, JVM, and Web platforms"
+        url = "https://github.com/ChiliNoodles/Kurrency"
+
+        licenses {
+            license {
+                name = "Apache License, Version 2.0"
+                url = "https://www.apache.org/licenses/LICENSE-2.0"
+            }
+        }
+
+        developers {
+            developer {
+                id = "merkost"
+                name = "Konstantin Merenkov"
+                email = "merkostdev@gmail.com"
+            }
+
+            developer {
+                id = "diogocavaiar"
+                name = "Diogo Cavaiar"
+                email = "cavaiarconsulting@gmail.com"
+            }
+        }
+
+        scm {
+            url = "https://github.com/ChiliNoodles/Kurrency"
+        }
     }
 }
