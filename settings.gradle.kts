@@ -1,4 +1,4 @@
-rootProject.name = "Kurrency"
+rootProject.name = "KurrencyProject"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
@@ -34,4 +34,4 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-include(":sample", "kurrency-core")
+include(":sample", "kurrency")
