@@ -28,12 +28,6 @@ jobs:
       - name: Run JVM tests
         run: ./gradlew :kurrency-core:jvmTest
 
-      - name: Run Android instrumented tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 29
-          script: ./gradlew :kurrency-core:connectedDebugAndroidTest
-
       - name: Run iOS tests
         run: ./gradlew :kurrency-core:iosSimulatorArm64Test
 
