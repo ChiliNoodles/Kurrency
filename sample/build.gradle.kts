@@ -20,7 +20,7 @@ kotlin {
         iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-//            export(project(":currency-logging"))
+            export(project(":kurrency-core"))
             baseName = "ComposeApp"
             isStatic = true
         }
@@ -52,10 +52,11 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
+            implementation(compose.material)
             implementation(compose.material3)
             implementation(compose.components.uiToolingPreview)
             implementation(kotlin("test"))
-//            api(project(":kurrency-core"))
+            api(project(":kurrency-core"))
         }
 
         androidMain.dependencies {
@@ -73,7 +74,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 24
         targetSdk = 36
 
         applicationId = "io.github.chilinoodles.sample"
