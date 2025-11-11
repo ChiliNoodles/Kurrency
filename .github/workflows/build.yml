@@ -25,15 +25,32 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Run all tests
-        run: ./gradlew :kurrency-core:allTests --continue
+      - name: Run JVM tests
+        run: ./gradlew :kurrency-core:jvmTest
+
+      - name: Run Android instrumented tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          script: ./gradlew :kurrency-core:connectedDebugAndroidTest
+
+      - name: Run iOS tests
+        run: ./gradlew :kurrency-core:iosSimulatorArm64Test
+
+      - name: Run JS tests
+        run: ./gradlew :kurrency-core:jsTest
+
+      - name: Run WasmJs tests
+        run: ./gradlew :kurrency-core:wasmJsTest
 
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
-          path: kurrency-core/build/reports/tests/
+          path: |
+            kurrency-core/build/reports/tests/
+            kurrency-core/build/test-results/
           retention-days: 30
 
   build:

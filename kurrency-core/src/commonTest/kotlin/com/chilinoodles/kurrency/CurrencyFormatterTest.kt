@@ -120,7 +120,8 @@ class CurrencyFormatterTest {
     @Test
     fun testFormatWithCommaDecimalSeparator() {
         val result = CurrencyFormatter.formatCurrencyStyle("100,50", "EUR")
-        
+
+        print(result.exceptionOrNull())
         assertTrue(result.isSuccess)
         assertNotNull(result.getOrNull())
     }

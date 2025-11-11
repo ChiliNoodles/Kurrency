@@ -25,8 +25,23 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Run all tests
-        run: ./gradlew :kurrency-core:allTests --continue
+      - name: Run JVM tests
+        run: ./gradlew :kurrency-core:jvmTest
+
+      - name: Run Android instrumented tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          script: ./gradlew :kurrency-core:connectedDebugAndroidTest
+
+      - name: Run iOS tests
+        run: ./gradlew :kurrency-core:iosSimulatorArm64Test
+
+      - name: Run JS tests
+        run: ./gradlew :kurrency-core:jsTest
+
+      - name: Run WasmJs tests
+        run: ./gradlew :kurrency-core:wasmJsTest
 
       - name: Publish to MavenCentral
         run: ./gradlew publishToMavenCentral --no-configuration-cache
