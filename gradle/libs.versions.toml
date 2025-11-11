@@ -1,11 +1,6 @@
 [versions]
-<<<<<<< HEAD
 appVersionCode = "1"
 appVersionName = "0.1.0"
-=======
-appVersionCode = "2"
-appVersionName = "0.2.0"
->>>>>>> origin/main
 
 # SDK Versions
 minSdk = "21"
@@ -14,7 +9,6 @@ targetSdk = "36"
 javaVersion = "21"
 jvmVersion = "JVM_21"
 
-<<<<<<< HEAD
 agp = "8.13.1"
 androidx-activity = "1.11.0"
 androidx-appcompat = "1.7.1"
@@ -33,28 +27,6 @@ core = "1.7.0"
 maven-publish = "0.34.0"
 kotlinx-datetime = "0.7.1"
 cedar-logging = "0.2.2"
-=======
-agp = "8.9.3"
-android-compileSdk = "35"
-android-minSdk = "24"
-android-targetSdk = "35"
-androidx-activity = "1.10.1"
-androidx-appcompat = "1.7.1"
-androidx-core = "1.16.0"
-androidx-espresso = "3.6.1"
-androidx-lifecycle = "2.9.1"
-androidx-testExt = "1.2.1"
-composeHotReload = "1.0.0-beta04"
-composeMultiplatform = "1.8.2"
-junit = "4.13.2"
-kotlin = "2.2.0"
-kotlinx-coroutines = "1.10.2"
-kotlinStdlib = "2.2.0"
-runner = "1.6.2"
-core = "1.6.1"
-maven-publish = "0.34.0"
-kotlinx-datetime = "0.6.1"
->>>>>>> origin/main
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -75,10 +47,7 @@ kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
-<<<<<<< HEAD
 cedar-logging = { group = "io.github.chilinoodles", name = "cedar-logging", version.ref = "cedar-logging" }
-=======
->>>>>>> origin/main
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
