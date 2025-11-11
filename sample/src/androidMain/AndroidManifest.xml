@@ -9,10 +9,18 @@
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity
+<<<<<<< HEAD
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+=======
+            android:exported="true"
+            android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+>>>>>>> origin/main
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
