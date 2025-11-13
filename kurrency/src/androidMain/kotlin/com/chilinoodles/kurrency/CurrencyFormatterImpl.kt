@@ -10,7 +10,7 @@ actual class CurrencyFormatterImpl : CurrencyFormat {
 
     actual override fun getFractionDigits(currencyCode: String): Result<Int> =
         runCatching {
-            val currency = Currency.getInstance(currencyCode)
+            val currency = Currency.getInstance(currencyCode.uppercase())
             val fractionDigits = currency.defaultFractionDigits
             require(fractionDigits >= 0) {
                 "Unsupported fraction digits for currency: $currencyCode"
@@ -37,7 +37,7 @@ actual class CurrencyFormatterImpl : CurrencyFormat {
     ): Result<String> =
         runCatching {
             val locale = Locale.getDefault()
-            val currency = Currency.getInstance(currencyCode)
+            val currency = Currency.getInstance(currencyCode.uppercase())
 
             val normalized = amount.replaceCommaWithDot().trim()
             require(normalized.isNotEmpty()) {
@@ -58,3 +58,9 @@ actual class CurrencyFormatterImpl : CurrencyFormat {
             numberFormat.format(value)
         }
 }
+
+actual fun isValidCurrency(currencyCode: String): Boolean =
+    runCatching {
+        Currency.getInstance(currencyCode.uppercase())
+        true
+    }.getOrDefault(false)

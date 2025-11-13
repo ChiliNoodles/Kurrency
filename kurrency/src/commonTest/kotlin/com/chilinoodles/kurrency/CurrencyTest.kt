@@ -210,5 +210,82 @@ class CurrencyTest {
         assertTrue(result.isSuccess)
         assertNotNull(result.getOrNull())
     }
+    
+    @Test
+    fun testCurrencyEquality() {
+        val currency1 = Currency("USD")
+        val currency2 = Currency("USD")
+        
+        assertEquals(currency1, currency2)
+        assertTrue(currency1 == currency2)
+    }
+    
+    @Test
+    fun testCurrencyInequality() {
+        val currency1 = Currency("USD")
+        val currency2 = Currency("EUR")
+        
+        assertFalse(currency1 == currency2)
+        assertTrue(currency1 != currency2)
+    }
+    
+    @Test
+    fun testCurrencyEqualityWithDifferentFractionDigits() {
+        val currency1 = Currency("USD", 2)
+        val currency2 = Currency("USD", 3)
+        
+        assertEquals(currency1, currency2)
+        assertTrue(currency1 == currency2)
+    }
+    
+    @Test
+    fun testCurrencyHashCode() {
+        val currency1 = Currency("USD")
+        val currency2 = Currency("USD")
+        
+        assertEquals(currency1.hashCode(), currency2.hashCode())
+    }
+    
+    @Test
+    fun testCurrencyHashCodeDifferentCodes() {
+        val currency1 = Currency("USD")
+        val currency2 = Currency("EUR")
+        
+        assertTrue(currency1.hashCode() != currency2.hashCode())
+    }
+    
+    @Test
+    fun testIsValidWithValidCurrency() {
+        assertTrue(Currency.isValid("USD"))
+        assertTrue(Currency.isValid("EUR"))
+        assertTrue(Currency.isValid("GBP"))
+        assertTrue(Currency.isValid("JPY"))
+    }
+    
+    @Test
+    fun testIsValidWithInvalidFormat() {
+        assertFalse(Currency.isValid("US"))
+        assertFalse(Currency.isValid("USDD"))
+        assertFalse(Currency.isValid("123"))
+        assertFalse(Currency.isValid("US$"))
+    }
+    
+    @Test
+    fun testIsValidWithInvalidCurrencyCode() {
+        assertFalse(Currency.isValid("INVALID"))
+        assertFalse(Currency.isValid("XYZ"))
+    }
+    
+    @Test
+    fun testIsValidWithEmptyString() {
+        assertFalse(Currency.isValid(""))
+    }
+    
+    @Test
+    fun testIsValidWithLowercase() {
+        assertTrue(Currency.isValid("usd"))
+        assertTrue(Currency.isValid("eur"))
+        assertTrue(Currency.isValid("jpy"))
+    }
 }
 

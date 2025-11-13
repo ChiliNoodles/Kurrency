@@ -54,3 +54,22 @@ actual class CurrencyFormatterImpl : CurrencyFormat {
     }
 }
 
+actual fun isValidCurrency(currencyCode: String): Boolean =
+    runCatching {
+        val upperCode = currencyCode.uppercase()
+        val formatter = NSNumberFormatter().apply {
+            this.currencyCode = upperCode
+            this.numberStyle = NSNumberFormatterCurrencyStyle
+            this.locale = NSLocale.currentLocale
+        }
+        val formatted = formatter.stringFromNumber(NSNumber(1.0))
+        if (formatted == null) {
+            return false
+        }
+        val hasNumber = formatted.contains("1") || formatted.matches(Regex(".*[0-9].*"))
+        val notJustCode = formatted != upperCode && 
+                         !formatted.equals(upperCode + " 1", ignoreCase = true) &&
+                         !formatted.equals("1 " + upperCode, ignoreCase = true)
+        hasNumber && notJustCode
+    }.getOrDefault(false)
+

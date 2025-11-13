@@ -60,3 +60,8 @@ Carthage/Build/
 *.rej
 *~
 
+
+
+local.properties
+gradle.properties
+28282D1A.gpg

@@ -5,11 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -47,15 +47,15 @@ fun KurrencySampleApp() {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .statusBarsPadding()
+                    .imePadding()
                     .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 HeaderSection()
-                BasicFormattingExample()
-                CurrencyStateExample()
-                MultiCurrencyExample()
-                InteractiveCurrencyConverter()
+                CombinedExamplesCard()
+                CurrencyListSection()
             }
         }
     }
@@ -77,77 +77,116 @@ private fun HeaderSection() {
         )
         Text(
             text = "Kotlin Multiplatform Currency Library",
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
 
 @Composable
-private fun BasicFormattingExample() {
-    SampleCard(title = "Basic Formatting") {
+private fun CombinedExamplesCard() {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            Text(
+                text = "Examples",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            BasicFormattingSection()
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            CurrencyStateSection()
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            MultiCurrencySection()
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            InteractiveConverterSection()
+        }
+    }
+}
+
+@Composable
+private fun BasicFormattingSection() {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            text = "Basic Formatting",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
         val currency = remember { Currency("USD") }
         val standardFormatted by currency.format("1234.56")
         val isoFormatted by currency.format("1234.56", CurrencyStyle.Iso)
 
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            FormatExample(
-                label = "Standard Style ($ symbol)",
-                value = standardFormatted
-            )
-
-            FormatExample(
-                label = "ISO Style (USD code)",
-                value = isoFormatted
-            )
-
-            FormatExample(
-                label = "Fraction Digits",
-                value = "${currency.fractionDigits} digits"
-            )
-        }
+        FormatExample(
+            label = "Standard Style",
+            value = standardFormatted
+        )
+        FormatExample(
+            label = "ISO Style",
+            value = isoFormatted
+        )
+        FormatExample(
+            label = "Fraction Digits",
+            value = "${currency.fractionDigits} digits"
+        )
     }
 }
 
 @Composable
-private fun CurrencyStateExample() {
-    SampleCard(title = "Currency State Management") {
+private fun CurrencyStateSection() {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            text = "State Management",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
         val currencyState = rememberCurrencyState("EUR", "999.99")
 
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            DisplayBox(
-                label = "Formatted Amount",
-                value = currencyState.formattedAmount
+        CompactDisplayBox(
+            label = "Formatted Amount",
+            value = currencyState.formattedAmount
+        )
+        CompactDisplayBox(
+            label = "ISO Format",
+            value = currencyState.formattedAmountIso
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            ActionButton(
+                text = "Update Amount",
+                modifier = Modifier.weight(1f),
+                onClick = { currencyState.updateAmount("2500.00") }
             )
-
-            DisplayBox(
-                label = "ISO Format",
-                value = currencyState.formattedAmountIso
+            ActionButton(
+                text = "Change to GBP",
+                modifier = Modifier.weight(1f),
+                onClick = { currencyState.updateCurrency("GBP") }
             )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                ActionButton(
-                    text = "Update Amount",
-                    modifier = Modifier.weight(1f),
-                    onClick = { currencyState.updateAmount("2500.00") }
-                )
-
-                ActionButton(
-                    text = "Change to GBP",
-                    modifier = Modifier.weight(1f),
-                    onClick = { currencyState.updateCurrency("GBP") }
-                )
-            }
         }
     }
 }
 
 @Composable
-private fun MultiCurrencyExample() {
-    SampleCard(title = "Multiple Currencies") {
+private fun MultiCurrencySection() {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            text = "Multiple Currencies",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
         val baseAmount = "1000.00"
         val currencies = listOf(
             "USD" to "US Dollar",
@@ -157,10 +196,9 @@ private fun MultiCurrencyExample() {
             "CHF" to "Swiss Franc"
         )
 
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             currencies.forEach { (code, name) ->
                 val state = rememberCurrencyState(code, baseAmount)
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -179,7 +217,6 @@ private fun MultiCurrencyExample() {
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-
                     Text(
                         text = state.formattedAmount,
                         style = MaterialTheme.typography.titleMedium,
@@ -187,9 +224,8 @@ private fun MultiCurrencyExample() {
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
-
                 if (code != currencies.last().first) {
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                 }
             }
         }
@@ -197,110 +233,85 @@ private fun MultiCurrencyExample() {
 }
 
 @Composable
-private fun InteractiveCurrencyConverter() {
-    SampleCard(title = "Interactive Converter") {
+private fun InteractiveConverterSection() {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Text(
+            text = "Interactive Converter",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
         var inputAmount by remember { mutableStateOf("100.00") }
         var selectedCurrency by remember { mutableStateOf("USD") }
 
         val currencyState = rememberCurrencyState(selectedCurrency, inputAmount)
-
         val availableCurrencies = listOf("USD", "EUR", "GBP", "JPY", "CAD", "AUD")
 
-        Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-            OutlinedTextField(
-                value = inputAmount,
-                onValueChange = { newValue ->
-                    inputAmount = newValue
-                    currencyState.updateAmount(newValue)
-                },
-                label = { Text("Amount") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                textStyle = MaterialTheme.typography.bodyLarge
-            )
+        OutlinedTextField(
+            value = inputAmount,
+            onValueChange = { newValue ->
+                inputAmount = newValue
+                currencyState.updateAmount(newValue)
+            },
+            label = { Text("Amount") },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            textStyle = MaterialTheme.typography.bodyLarge
+        )
 
-            Text(
-                text = "Select Currency:",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium
-            )
+        Text(
+            text = "Select Currency:",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                availableCurrencies.take(3).forEach { currency ->
-                    CurrencyChip(
-                        code = currency,
-                        isSelected = selectedCurrency == currency,
-                        onClick = {
-                            selectedCurrency = currency
-                            currencyState.updateCurrency(currency)
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                availableCurrencies.drop(3).forEach { currency ->
-                    CurrencyChip(
-                        code = currency,
-                        isSelected = selectedCurrency == currency,
-                        onClick = {
-                            selectedCurrency = currency
-                            currencyState.updateCurrency(currency)
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            ResultBox(
-                label = "Standard Format",
-                value = currencyState.formattedAmount
-            )
-
-            ResultBox(
-                label = "ISO Format",
-                value = currencyState.formattedAmountIso
-            )
-        }
-    }
-}
-
-@Composable
-private fun SampleCard(
-    title: String,
-    content: @Composable () -> Unit
-) {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            HorizontalDivider()
-
-            content()
+            availableCurrencies.take(3).forEach { currency ->
+                CurrencyChip(
+                    code = currency,
+                    isSelected = selectedCurrency == currency,
+                    onClick = {
+                        selectedCurrency = currency
+                        currencyState.updateCurrency(currency)
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            availableCurrencies.drop(3).forEach { currency ->
+                CurrencyChip(
+                    code = currency,
+                    isSelected = selectedCurrency == currency,
+                    onClick = {
+                        selectedCurrency = currency
+                        currencyState.updateCurrency(currency)
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        CompactResultBox(
+            label = "Standard Format",
+            value = currencyState.formattedAmount
+        )
+        CompactResultBox(
+            label = "ISO Format",
+            value = currencyState.formattedAmountIso
+        )
     }
 }
+
+
 
 @Composable
 private fun FormatExample(label: String, value: String) {
@@ -324,64 +335,56 @@ private fun FormatExample(label: String, value: String) {
 }
 
 @Composable
-private fun DisplayBox(label: String, value: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+private fun CompactDisplayBox(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            ),
-            shape = RoundedCornerShape(20.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-        }
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
     }
 }
 
 @Composable
-private fun ResultBox(label: String, value: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+private fun CompactResultBox(label: String, value: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer
-            ),
-            shape = RoundedCornerShape(24.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
+                    shape = RoundedCornerShape(16.dp)
                 )
-            }
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onTertiaryContainer
+            )
         }
     }
 }
@@ -428,5 +431,21 @@ private fun CurrencyChip(
             selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
         )
     )
+}
+
+@Composable
+private fun CurrencyListSection() {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Currency Registry & Search",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        EmbeddedCurrencyList()
+    }
 }
 

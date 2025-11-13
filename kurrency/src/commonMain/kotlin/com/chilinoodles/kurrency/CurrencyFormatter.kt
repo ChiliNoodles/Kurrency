@@ -9,6 +9,8 @@ expect class CurrencyFormatterImpl() : CurrencyFormat {
     override fun formatIsoCurrencyStyle(amount: String, currencyCode: String): Result<String>
 }
 
+expect fun isValidCurrency(currencyCode: String): Boolean
+
 object CurrencyFormatter {
     private const val DEFAULT_FRACTION_DIGITS = 2
     
