@@ -1,4 +1,4 @@
-package com.chilinoodles.kurrency.sample
+package io.chilinoodles.kurrency.sample
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

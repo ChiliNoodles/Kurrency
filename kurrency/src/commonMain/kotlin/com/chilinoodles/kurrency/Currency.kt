@@ -12,6 +12,23 @@ data class Currency(
         Cedar.tag("Kurrency").d("Currency created: code=$code, fractionDigits=$fractionDigits")
     }
     
+    companion object {
+        fun isValid(code: String): Boolean {
+            if (code.length != 3 || !code.all { it.isLetter() }) {
+                return false
+            }
+            return isValidCurrency(code)
+        }
+    }
+    
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Currency) return false
+        return code == other.code
+    }
+    
+    override fun hashCode(): Int = code.hashCode()
+    
     fun formatAmount(
         amount: String,
         style: CurrencyStyle = CurrencyStyle.Standard

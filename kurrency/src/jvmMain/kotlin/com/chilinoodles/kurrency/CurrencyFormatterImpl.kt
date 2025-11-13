@@ -9,7 +9,7 @@ actual class CurrencyFormatterImpl : CurrencyFormat {
     
     actual override fun getFractionDigits(currencyCode: String): Result<Int> {
         return runCatching {
-            val currency = Currency.getInstance(currencyCode)
+            val currency = Currency.getInstance(currencyCode.uppercase())
             requireNotNull(currency) { "Currency instance is null for code: $currencyCode" }
             currency.defaultFractionDigits
         }
@@ -31,7 +31,7 @@ actual class CurrencyFormatterImpl : CurrencyFormat {
             val value = amount.replaceCommaWithDot().toDouble()
             require(value.isFinite()) { "Amount must be a finite number" }
             
-            val currency = Currency.getInstance(currencyCode)
+            val currency = Currency.getInstance(currencyCode.uppercase())
             requireNotNull(currency) { "Currency instance is null for code: $currencyCode" }
             
             if (useIsoCode) {
@@ -53,4 +53,10 @@ actual class CurrencyFormatterImpl : CurrencyFormat {
         currency = Currency.getInstance(currencyCode)
     }
 }
+
+actual fun isValidCurrency(currencyCode: String): Boolean =
+    runCatching {
+        val currency = Currency.getInstance(currencyCode.uppercase())
+        currency != null
+    }.getOrDefault(false)
 
