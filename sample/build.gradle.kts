@@ -20,7 +20,7 @@ kotlin {
         iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            export(project(":kurrency"))
+            export(project(":kurrency-core"))
             baseName = "ComposeApp"
             isStatic = true
         }
@@ -56,7 +56,7 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.components.uiToolingPreview)
             implementation(kotlin("test"))
-            api(project(":kurrency"))
+            api(project(":kurrency-core"))
         }
 
         androidMain.dependencies {
