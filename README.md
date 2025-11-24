@@ -39,7 +39,7 @@ Type-safe currency formatting for Kotlin Multiplatform with Compose support and 
 
 ```kotlin
 dependencies {
-    implementation("io.github.chilinoodles:kurrency:1.0.0")
+    implementation("org.kimplify:kurrency:1.0.0")
 }
 ```
 
@@ -47,8 +47,8 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("io.github.chilinoodles:kurrency:1.0.0")
-    implementation("io.github.chilinoodles:kurrency-compose:1.0.0")
+    implementation("org.kimplify:kurrency:1.0.0")
+    implementation("org.kimplify:kurrency-compose:1.0.0")
 }
 ```
 
@@ -57,7 +57,7 @@ dependencies {
 ### Basic Usage (System Locale)
 
 ```kotlin
-import com.chilinoodles.kurrency.CurrencyFormatter
+import org.kimplify.kurrency.CurrencyFormatter
 
 // Using the singleton with system locale
 val result: Result<String> = CurrencyFormatter.formatCurrencyStyle("1234.56", "USD")
@@ -84,8 +84,8 @@ CurrencyFormatter.formatIsoCurrencyStyle("1234.56", "USD")
 ### Using Predefined Locales
 
 ```kotlin
-import com.chilinoodles.kurrency.CurrencyFormatter
-import com.chilinoodles.kurrency.KurrencyLocale
+import org.kimplify.kurrency.CurrencyFormatter
+import org.kimplify.kurrency.KurrencyLocale
 
 // Create formatters for specific locales
 val usFormatter = CurrencyFormatter.create(KurrencyLocale.US)
@@ -138,7 +138,7 @@ val formatter = CurrencyFormatter.createWithSystemLocale()
 
 ```kotlin
 import androidx.compose.ui.text.intl.Locale
-import com.chilinoodles.kurrency.toKurrencyLocale
+import org.kimplify.kurrency.toKurrencyLocale
 
 @Composable
 fun MyComposable() {
@@ -157,8 +157,8 @@ Add the `kurrency-compose` dependency for Jetpack Compose Multiplatform support.
 The formatter automatically recreates when the locale changes (key-based recomposition).
 
 ```kotlin
-import com.chilinoodles.kurrency.compose.rememberCurrencyFormatter
-import com.chilinoodles.kurrency.KurrencyLocale
+import org.kimplify.kurrency.compose.rememberCurrencyFormatter
+import org.kimplify.kurrency.KurrencyLocale
 
 @Composable
 fun PriceDisplay(amount: String, currencyCode: String) {
@@ -186,9 +186,9 @@ fun PriceDisplay(amount: String, currencyCode: String) {
 Provide a formatter for an entire subtree of your composition.
 
 ```kotlin
-import com.chilinoodles.kurrency.compose.ProvideCurrencyFormatter
-import com.chilinoodles.kurrency.compose.LocalCurrencyFormatter
-import com.chilinoodles.kurrency.KurrencyLocale
+import org.kimplify.kurrency.compose.ProvideCurrencyFormatter
+import org.kimplify.kurrency.compose.LocalCurrencyFormatter
+import org.kimplify.kurrency.KurrencyLocale
 
 @Composable
 fun App() {

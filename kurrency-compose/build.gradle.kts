@@ -90,7 +90,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.chilinoodles.kurrency.compose"
+    namespace = "org.kimplify.kurrency.compose"
     compileSdk = 36
 
     defaultConfig {
@@ -106,7 +106,7 @@ android {
 mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
-    coordinates("io.github.chilinoodles", "kurrency-compose", libs.versions.appVersionName.get())
+    coordinates("org.kimplify", "kurrency-compose", libs.versions.appVersionName.get())
 
     pom {
         name = "Kurrency Compose"
