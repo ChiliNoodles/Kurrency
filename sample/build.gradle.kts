@@ -20,7 +20,7 @@ kotlin {
         iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            export(project(":kurrency"))
+            export(project(":kurrency-core"))
             baseName = "ComposeApp"
             isStatic = true
         }
@@ -56,7 +56,7 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.components.uiToolingPreview)
             implementation(kotlin("test"))
-            api(project(":kurrency"))
+            api(project(":kurrency-core"))
         }
 
         androidMain.dependencies {
@@ -70,14 +70,14 @@ kotlin {
 }
 
 android {
-    namespace = "io.github.chilinoodles.sample"
+    namespace = "org.kimplify.sample"
     compileSdk = 36
 
     defaultConfig {
         minSdk = 24
         targetSdk = 36
 
-        applicationId = "io.github.chilinoodles.sample"
+        applicationId = "org.kimplify.sample"
         versionCode = 1
         versionName = "1.0.0"
     }
@@ -85,11 +85,11 @@ android {
 
 compose.desktop {
     application {
-        mainClass = "io.github.chilinoodles.sample.MainKt"
+        mainClass = "org.kimplify.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "io.github.chilinoodles.sample"
+            packageName = "org.kimplify.sample"
             packageVersion = "1.0.0"
         }
     }
@@ -98,7 +98,7 @@ compose.desktop {
 tasks.register<JavaExec>("runJvm") {
     group = "application"
     description = "Runs the JVM MainKt"
-    mainClass.set("io.github.chilinoodles.sample.MainKt")
+    mainClass.set("org.kimplify.MainKt")
     classpath = kotlin.targets
         .getByName("jvm")
         .compilations

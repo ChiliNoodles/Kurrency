@@ -34,4 +34,4 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-include(":sample", "kurrency")
+include(":sample", ":kurrency-core", ":kurrency-compose")
