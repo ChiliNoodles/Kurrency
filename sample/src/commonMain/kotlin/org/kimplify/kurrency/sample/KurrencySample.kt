@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalKurrency::class)
+
 package org.kimplify.kurrency.sample
 
 import androidx.compose.foundation.layout.Arrangement
@@ -33,8 +35,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.kimplify.kurrency.Kurrency
 import org.kimplify.kurrency.CurrencyStyle
+import org.kimplify.kurrency.ExperimentalKurrency
+import org.kimplify.kurrency.Kurrency
 import org.kimplify.kurrency.rememberCurrencyState
 
 @Composable
@@ -439,4 +442,3 @@ private fun CurrencyListSection() {
         EmbeddedCurrencyList()
     }
 }
-

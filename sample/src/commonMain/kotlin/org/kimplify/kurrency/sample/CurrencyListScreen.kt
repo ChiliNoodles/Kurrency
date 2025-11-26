@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalKurrency::class)
+
 package org.kimplify.kurrency.sample
 
 import androidx.compose.foundation.background
@@ -38,6 +40,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.kimplify.kurrency.CurrencyMetadata
+import org.kimplify.kurrency.ExperimentalKurrency
 import org.kimplify.kurrency.rememberCurrencyState
 
 @Composable
@@ -371,4 +374,3 @@ private fun EmptyState(searchQuery: String) {
         }
     }
 }
-

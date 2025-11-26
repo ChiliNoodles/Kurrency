@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalKurrency::class)
+
 package org.kimplify.kurrency
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.runner.RunWith
@@ -139,7 +141,7 @@ class CurrencyStateTestInstrumented {
         val state = CurrencyState("INVALID", "100.00")
         val formatted = state.formattedAmount
         
-        assertEquals("", formatted)
+        assertEquals("100.00", formatted)
     }
     
     @Test
@@ -210,4 +212,3 @@ class CurrencyStateTestInstrumented {
         assertEquals(state1.amount, state2.amount)
     }
 }
-

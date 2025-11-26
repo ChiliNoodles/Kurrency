@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalKurrency::class)
+
 package org.kimplify.kurrency.sample
 
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.kimplify.kurrency.ExperimentalKurrency
 import org.kimplify.kurrency.rememberCurrencyState
 
 @Composable
@@ -108,4 +111,3 @@ fun MultiCurrencyPriceDisplay(baseAmount: String) {
         Text("GBP: ${gbpPrice.formattedAmount}")
     }
 }
-

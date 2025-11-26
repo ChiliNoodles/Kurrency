@@ -10,6 +10,7 @@ import org.kimplify.cedar.logging.Cedar
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
+@ExperimentalKurrency
 @Stable
 class CurrencyState(
     initialCurrencyCode: String,
@@ -50,6 +51,7 @@ class CurrencyState(
     }
 }
 
+@ExperimentalKurrency
 class FormattedAmountDelegate(
     private val state: CurrencyState,
     private val style: CurrencyStyle = CurrencyStyle.Standard
@@ -59,9 +61,11 @@ class FormattedAmountDelegate(
     }
 }
 
+@ExperimentalKurrency
 fun CurrencyState.formattedAmount(style: CurrencyStyle = CurrencyStyle.Standard) = 
     FormattedAmountDelegate(this, style)
 
+@ExperimentalKurrency
 @Composable
 fun rememberCurrencyState(
     currencyCode: String,
@@ -70,6 +74,7 @@ fun rememberCurrencyState(
     CurrencyState(currencyCode, initialAmount)
 }
 
+@ExperimentalKurrency
 @Composable
 fun rememberCurrencyState(
     currencyCode: String,
@@ -77,4 +82,3 @@ fun rememberCurrencyState(
 ): CurrencyState = remember(currencyCode, initialAmount) {
     CurrencyState(currencyCode, initialAmount.toString())
 }
-

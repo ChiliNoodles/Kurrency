@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalKurrency::class)
+
 package org.kimplify.kurrency
 
 import kotlin.test.Test
@@ -207,4 +209,3 @@ class CurrencyStateTest {
         assertEquals(state1.amount, state2.amount)
     }
 }
-

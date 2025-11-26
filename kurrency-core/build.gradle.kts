@@ -121,8 +121,8 @@ android {
 //https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
 mavenPublishing {
     publishToMavenCentral()
-    signAllPublications()
-    coordinates("org.kimplify", "kurrency", libs.versions.appVersionName.get())
+//    signAllPublications()
+    coordinates("org.kimplify", "kurrency-core", libs.versions.appVersionName.get())
 
     pom {
         name = "Kurrency"
