@@ -33,7 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.kimplify.kurrency.Currency
+import org.kimplify.kurrency.Kurrency
 import org.kimplify.kurrency.CurrencyStyle
 import org.kimplify.kurrency.rememberCurrencyState
 
@@ -89,7 +89,7 @@ private fun HeaderSection() {
 @Composable
 private fun BasicFormattingExample() {
     SampleCard(title = "Basic Formatting") {
-        val currency = remember { Currency("USD") }
+        val currency = remember { Kurrency.USD }
         val standardFormatted by currency.format("1234.56")
         val isoFormatted by currency.format("1234.56", CurrencyStyle.Iso)
 

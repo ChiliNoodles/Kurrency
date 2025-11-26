@@ -55,7 +55,6 @@ class KurrencyLocaleTest {
 
     @Test
     fun testPredefinedLocales() {
-        // Test that all predefined locales are valid
         val locales = listOf(
             KurrencyLocale.US,
             KurrencyLocale.UK,

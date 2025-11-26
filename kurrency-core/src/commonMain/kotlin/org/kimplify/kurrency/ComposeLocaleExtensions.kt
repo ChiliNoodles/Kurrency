@@ -7,12 +7,12 @@ import androidx.compose.ui.text.intl.Locale
 /**
  * Creates a [KurrencyLocale] from a Jetpack Compose Multiplatform [Locale].
  *
+ * Uses platform-specific direct conversion for better performance and accuracy.
+ *
  * @param composeLocale The Compose locale to convert
- * @return Result with KurrencyLocale on success, or failure if the conversion fails
+ * @return KurrencyLocale instance
  */
-fun KurrencyLocale.Companion.fromComposeLocale(composeLocale: Locale): Result<KurrencyLocale> {
-    return fromLanguageTag(composeLocale.toLanguageTag())
-}
+expect fun KurrencyLocale.Companion.fromComposeLocale(composeLocale: Locale): KurrencyLocale
 
 /**
  * Creates a [KurrencyLocale] from the current Compose system locale.
@@ -25,22 +25,22 @@ fun KurrencyLocale.Companion.fromComposeLocale(composeLocale: Locale): Result<Ku
 fun KurrencyLocale.Companion.current(): KurrencyLocale {
     val composeLocale = Locale.current
     return remember(composeLocale) {
-        fromComposeLocale(composeLocale).getOrElse {
-            // Fallback to system locale if conversion fails
-            systemLocale()
-        }
+        fromComposeLocale(composeLocale)
     }
 }
 
 /**
  * Extension function to convert a Compose Locale to a KurrencyLocale.
  *
+ * Uses platform-specific direct conversion for zero overhead.
+ *
  * Usage:
  * ```
  * val composeLocale = Locale.current
- * val kurrencyLocale = composeLocale.toKurrencyLocale().getOrNull()
+ * val kurrencyLocale = composeLocale.toKurrencyLocale()
+ * val decimalSep = kurrencyLocale.decimalSeparator
  * ```
  */
-fun Locale.toKurrencyLocale(): Result<KurrencyLocale> {
-    return KurrencyLocale.fromLanguageTag(this.toLanguageTag())
+fun Locale.toKurrencyLocale(): KurrencyLocale {
+    return KurrencyLocale.fromComposeLocale(this)
 }

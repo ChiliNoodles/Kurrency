@@ -1,5 +1,6 @@
 package org.kimplify.kurrency
 
+import java.text.DecimalFormatSymbols
 import java.util.Locale
 
 /**
@@ -9,21 +10,23 @@ actual class KurrencyLocale internal constructor(internal val locale: Locale) {
     actual val languageTag: String
         get() = locale.toLanguageTag()
 
+    actual val decimalSeparator: Char
+        get() = DecimalFormatSymbols.getInstance(locale).decimalSeparator
+
+    actual val groupingSeparator: Char
+        get() = DecimalFormatSymbols.getInstance(locale).groupingSeparator
+
+    actual val usesCommaAsDecimalSeparator: Boolean
+        get() = decimalSeparator == ','
+
     actual companion object {
         actual fun fromLanguageTag(languageTag: String): Result<KurrencyLocale> {
             return try {
-                // Validate format before creating locale
                 if (languageTag.isBlank()) {
                     return Result.failure(IllegalArgumentException("Language tag cannot be blank"))
                 }
 
-                // Basic BCP 47 validation
-                val bcp47Pattern = Regex(
-                    "^[a-z]{2,3}(-[A-Z][a-z]{3})?(-[A-Z]{2})?(-[0-9A-Za-z]+)*$",
-                    RegexOption.IGNORE_CASE
-                )
-
-                if (!bcp47Pattern.matches(languageTag)) {
+                if (!BCP47_LANGUAGE_TAG_REGEX.matches(languageTag)) {
                     return Result.failure(IllegalArgumentException("Invalid language tag format: $languageTag"))
                 }
 
@@ -38,7 +41,6 @@ actual class KurrencyLocale internal constructor(internal val locale: Locale) {
             return KurrencyLocale(Locale.getDefault())
         }
 
-        // Predefined locales
         actual val US: KurrencyLocale = KurrencyLocale(Locale.US)
         actual val UK: KurrencyLocale = KurrencyLocale(Locale.UK)
         actual val CANADA: KurrencyLocale = KurrencyLocale(Locale.CANADA)

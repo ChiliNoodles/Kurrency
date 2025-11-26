@@ -20,8 +20,8 @@ class LocaleFormattingTest {
         )
 
         locales.forEach { locale ->
-            val formatter = CurrencyFormatterImpl(locale)
-            val result = formatter.formatCurrencyStyle(amount, currencyCode)
+            val formatter = CurrencyFormatter(locale)
+            val result = formatter.formatCurrencyStyleResult(amount, currencyCode)
 
             assertTrue(
                 result.isSuccess,
@@ -47,8 +47,8 @@ class LocaleFormattingTest {
         )
 
         locales.forEach { locale ->
-            val formatter = CurrencyFormatterImpl(locale)
-            val result = formatter.formatCurrencyStyle(amount, currencyCode)
+            val formatter = CurrencyFormatter(locale)
+            val result = formatter.formatCurrencyStyleResult(amount, currencyCode)
 
             assertTrue(
                 result.isSuccess,
@@ -73,8 +73,8 @@ class LocaleFormattingTest {
         )
 
         locales.forEach { locale ->
-            val formatter = CurrencyFormatterImpl(locale)
-            val result = formatter.formatIsoCurrencyStyle(amount, currencyCode)
+            val formatter = CurrencyFormatter(locale)
+            val result = formatter.formatIsoCurrencyStyleResult(amount, currencyCode)
 
             assertTrue(
                 result.isSuccess,
@@ -104,11 +104,10 @@ class LocaleFormattingTest {
 
         val fractionDigits = mutableSetOf<Int>()
 
-        locales.forEach { locale ->
-            val formatter = CurrencyFormatterImpl(locale)
-            val result = formatter.getFractionDigits(currencyCode)
+        locales.forEach { _ ->
+            val result = CurrencyFormatter.getFractionDigits(currencyCode)
 
-            assertTrue(result.isSuccess, "Should get fraction digits for ${locale.languageTag}")
+            assertTrue(result.isSuccess, "Should get fraction digits for $currencyCode")
             result.getOrNull()?.let { fractionDigits.add(it) }
         }
 
@@ -124,27 +123,27 @@ class LocaleFormattingTest {
     }
 
     @Test
-    fun testFactoryMethod_createWithLocale() {
-        val formatter = CurrencyFormatter.create(KurrencyLocale.GERMANY)
-        val result = formatter.formatCurrencyStyle("100.50", "EUR")
+    fun testConstructor_createWithLocale() {
+        val formatter = CurrencyFormatter(KurrencyLocale.GERMANY)
+        val result = formatter.formatCurrencyStyleResult("100.50", "EUR")
 
         assertTrue(result.isSuccess)
         assertNotNull(result.getOrNull())
     }
 
     @Test
-    fun testFactoryMethod_createWithSystemLocale() {
-        val formatter = CurrencyFormatter.createWithSystemLocale()
-        val result = formatter.formatCurrencyStyle("100.50", "USD")
+    fun testConstructor_createWithSystemLocale() {
+        val formatter = CurrencyFormatter()
+        val result = formatter.formatCurrencyStyleResult("100.50", "USD")
 
         assertTrue(result.isSuccess)
         assertNotNull(result.getOrNull())
     }
 
     @Test
-    fun testFactoryMethod_createWithNullLocale() {
-        val formatter = CurrencyFormatter.create(KurrencyLocale.systemLocale())
-        val result = formatter.formatCurrencyStyle("100.50", "USD")
+    fun testConstructor_createWithExplicitSystemLocale() {
+        val formatter = CurrencyFormatter(KurrencyLocale.systemLocale())
+        val result = formatter.formatCurrencyStyleResult("100.50", "USD")
 
         assertTrue(result.isSuccess)
         assertNotNull(result.getOrNull())

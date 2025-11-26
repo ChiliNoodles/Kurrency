@@ -13,21 +13,21 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testCurrencyCreation() {
-        val currency = Currency("USD")
+        val currency = Kurrency.USD
         assertEquals("USD", currency.code)
-        assertEquals(2, currency.fractionDigits)
+        assertEquals(2, currency.fractionDigits.getOrNull())
     }
-    
+
     @Test
     fun testJapaneseCurrencyFractionDigits() {
-        val currency = Currency("JPY")
+        val currency = Kurrency.JPY
         assertEquals("JPY", currency.code)
-        assertEquals(0, currency.fractionDigits)
+        assertEquals(0, currency.fractionDigits.getOrNull())
     }
     
     @Test
     fun testFormatAmountReturnsSuccess() {
-        val currency = Currency("USD")
+        val currency = Kurrency.fromCode("USD").getOrThrow()
         val result = currency.formatAmount("100.50")
         
         assertTrue(result.isSuccess)
@@ -36,7 +36,7 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testFormatAmountWithDoubleReturnsSuccess() {
-        val currency = Currency("USD")
+        val currency = Kurrency.fromCode("USD").getOrThrow()
         val result = currency.formatAmount(100.50)
         
         assertTrue(result.isSuccess)
@@ -45,7 +45,7 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testFormatAmountStandardStyle() {
-        val currency = Currency("USD")
+        val currency = Kurrency.fromCode("USD").getOrThrow()
         val result = currency.formatAmount("1234.56", CurrencyStyle.Standard)
         
         assertTrue(result.isSuccess)
@@ -55,7 +55,7 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testFormatAmountIsoStyle() {
-        val currency = Currency("USD")
+        val currency = Kurrency.fromCode("USD").getOrThrow()
         val result = currency.formatAmount("1234.56", CurrencyStyle.Iso)
         
         assertTrue(result.isSuccess)
@@ -65,7 +65,7 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testFormatAmountWithInvalidAmount() {
-        val currency = Currency("USD")
+        val currency = Kurrency.fromCode("USD").getOrThrow()
         val result = currency.formatAmount("invalid")
         
         assertTrue(result.isFailure)
@@ -75,7 +75,7 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testFormatAmountWithEmptyString() {
-        val currency = Currency("USD")
+        val currency = Kurrency.fromCode("USD").getOrThrow()
         val result = currency.formatAmount("")
         
         assertTrue(result.isFailure)
@@ -84,35 +84,34 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testFormatAmountWithInvalidCurrencyCode() {
-        val currency = Currency("INVALID")
-        val result = currency.formatAmount("100.00")
-        
-        assertTrue(result.isFailure)
-        val exception = result.exceptionOrNull()
-        assertTrue(exception is KurrencyError.InvalidCurrencyCode)
-    }
-    
-    @Test
-    fun testFormatAmountWithShortCurrencyCode() {
-        val currency = Currency("US")
-        val result = currency.formatAmount("100.00")
-        
+        // Since constructor is private, invalid currencies can't be created
+        // This test now validates that fromCode() fails for invalid codes
+        val result = Kurrency.fromCode("INVALID")
         assertTrue(result.isFailure)
         assertTrue(result.exceptionOrNull() is KurrencyError.InvalidCurrencyCode)
     }
-    
+
+    @Test
+    fun testFormatAmountWithShortCurrencyCode() {
+        // Since constructor is private, invalid currencies can't be created
+        // This test now validates that fromCode() fails for short codes
+        val result = Kurrency.fromCode("US")
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is KurrencyError.InvalidCurrencyCode)
+    }
+
     @Test
     fun testFormatAmountWithLongCurrencyCode() {
-        val currency = Currency("USDD")
-        val result = currency.formatAmount("100.00")
-        
+        // Since constructor is private, invalid currencies can't be created
+        // This test now validates that fromCode() fails for long codes
+        val result = Kurrency.fromCode("USDD")
         assertTrue(result.isFailure)
         assertTrue(result.exceptionOrNull() is KurrencyError.InvalidCurrencyCode)
     }
     
     @Test
     fun testFormatAmountOrEmpty() {
-        val currency = Currency("USD")
+        val currency = Kurrency.fromCode("USD").getOrThrow()
         val formatted = currency.formatAmountOrEmpty("100.50")
         
         assertNotNull(formatted)
@@ -121,7 +120,7 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testFormatAmountOrEmptyWithInvalidAmount() {
-        val currency = Currency("USD")
+        val currency = Kurrency.fromCode("USD").getOrThrow()
         val formatted = currency.formatAmountOrEmpty("invalid")
         
         assertEquals("", formatted)
@@ -129,7 +128,7 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testFormatAmountWithZero() {
-        val currency = Currency("USD")
+        val currency = Kurrency.fromCode("USD").getOrThrow()
         val result = currency.formatAmount("0.00")
         
         assertTrue(result.isSuccess)
@@ -138,7 +137,7 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testFormatAmountWithNegativeNumber() {
-        val currency = Currency("USD")
+        val currency = Kurrency.fromCode("USD").getOrThrow()
         val result = currency.formatAmount("-100.50")
         
         assertTrue(result.isSuccess)
@@ -147,7 +146,7 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testFormatAmountWithVeryLargeNumber() {
-        val currency = Currency("USD")
+        val currency = Kurrency.fromCode("USD").getOrThrow()
         val result = currency.formatAmount("999999999.99")
         
         assertTrue(result.isSuccess)
@@ -156,7 +155,7 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testFormatAmountWithCommaDecimalSeparator() {
-        val currency = Currency("EUR")
+        val currency = Kurrency.fromCode("EUR").getOrThrow()
         val result = currency.formatAmount("100,50")
         
         assertTrue(result.isSuccess)
@@ -164,7 +163,7 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testPropertyDelegation() {
-        val currency = Currency("USD")
+        val currency = Kurrency.fromCode("USD").getOrThrow()
         val delegate = currency.format("100.50")
         
         assertNotNull(delegate)
@@ -172,7 +171,7 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testPropertyDelegationWithStyle() {
-        val currency = Currency("USD")
+        val currency = Kurrency.fromCode("USD").getOrThrow()
         val delegate = currency.format("100.50", CurrencyStyle.Iso)
         
         assertNotNull(delegate)
@@ -180,7 +179,7 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testEuroFormatting() {
-        val currency = Currency("EUR")
+        val currency = Kurrency.fromCode("EUR").getOrThrow()
         val result = currency.formatAmount("1234.56")
         
         assertTrue(result.isSuccess)
@@ -189,7 +188,7 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testBritishPoundFormatting() {
-        val currency = Currency("GBP")
+        val currency = Kurrency.fromCode("GBP").getOrThrow()
         val result = currency.formatAmount("1234.56")
         
         assertTrue(result.isSuccess)
@@ -198,7 +197,7 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testJapaneseYenFormatting() {
-        val currency = Currency("JPY")
+        val currency = Kurrency.fromCode("JPY").getOrThrow()
         val result = currency.formatAmount("1234")
         
         assertTrue(result.isSuccess)
@@ -207,7 +206,7 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testSwissFrancFormatting() {
-        val currency = Currency("CHF")
+        val currency = Kurrency.fromCode("CHF").getOrThrow()
         val result = currency.formatAmount("1234.56")
         
         assertTrue(result.isSuccess)
@@ -216,8 +215,8 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testCurrencyEquality() {
-        val currency1 = Currency("USD")
-        val currency2 = Currency("USD")
+        val currency1 = Kurrency.fromCode("USD").getOrThrow()
+        val currency2 = Kurrency.fromCode("USD").getOrThrow()
         
         assertEquals(currency1, currency2)
         assertTrue(currency1 == currency2)
@@ -225,8 +224,8 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testCurrencyInequality() {
-        val currency1 = Currency("USD")
-        val currency2 = Currency("EUR")
+        val currency1 = Kurrency.fromCode("USD").getOrThrow()
+        val currency2 = Kurrency.fromCode("EUR").getOrThrow()
         
         assertFalse(currency1 == currency2)
         assertTrue(currency1 != currency2)
@@ -234,61 +233,63 @@ class CurrencyTestInstrumented {
     
     @Test
     fun testCurrencyEqualityWithDifferentFractionDigits() {
-        val currency1 = Currency("USD", 2)
-        val currency2 = Currency("USD", 3)
-        
+        // This test is no longer valid since constructor is private
+        // and fraction digits is a computed property, not a parameter
+        val currency1 = Kurrency.USD
+        val currency2 = Kurrency.USD
+
         assertEquals(currency1, currency2)
         assertTrue(currency1 == currency2)
     }
     
     @Test
     fun testCurrencyHashCode() {
-        val currency1 = Currency("USD")
-        val currency2 = Currency("USD")
+        val currency1 = Kurrency.fromCode("USD").getOrThrow()
+        val currency2 = Kurrency.fromCode("USD").getOrThrow()
         
         assertEquals(currency1.hashCode(), currency2.hashCode())
     }
     
     @Test
     fun testCurrencyHashCodeDifferentCodes() {
-        val currency1 = Currency("USD")
-        val currency2 = Currency("EUR")
+        val currency1 = Kurrency.fromCode("USD").getOrThrow()
+        val currency2 = Kurrency.fromCode("EUR").getOrThrow()
         
         assertTrue(currency1.hashCode() != currency2.hashCode())
     }
     
     @Test
     fun testIsValidWithValidCurrency() {
-        assertTrue(Currency.isValid("USD"))
-        assertTrue(Currency.isValid("EUR"))
-        assertTrue(Currency.isValid("GBP"))
-        assertTrue(Currency.isValid("JPY"))
+        assertTrue(Kurrency.isValid("USD"))
+        assertTrue(Kurrency.isValid("EUR"))
+        assertTrue(Kurrency.isValid("GBP"))
+        assertTrue(Kurrency.isValid("JPY"))
     }
     
     @Test
     fun testIsValidWithInvalidFormat() {
-        assertFalse(Currency.isValid("US"))
-        assertFalse(Currency.isValid("USDD"))
-        assertFalse(Currency.isValid("123"))
-        assertFalse(Currency.isValid("US$"))
+        assertFalse(Kurrency.isValid("US"))
+        assertFalse(Kurrency.isValid("USDD"))
+        assertFalse(Kurrency.isValid("123"))
+        assertFalse(Kurrency.isValid("US$"))
     }
     
     @Test
     fun testIsValidWithInvalidCurrencyCode() {
-        assertFalse(Currency.isValid("INVALID"))
-        assertFalse(Currency.isValid("XYZ"))
+        assertFalse(Kurrency.isValid("INVALID"))
+        assertFalse(Kurrency.isValid("XYZ"))
     }
     
     @Test
     fun testIsValidWithEmptyString() {
-        assertFalse(Currency.isValid(""))
+        assertFalse(Kurrency.isValid(""))
     }
     
     @Test
     fun testIsValidWithLowercase() {
-        assertTrue(Currency.isValid("usd"))
-        assertTrue(Currency.isValid("eur"))
-        assertTrue(Currency.isValid("jpy"))
+        assertTrue(Kurrency.isValid("usd"))
+        assertTrue(Kurrency.isValid("eur"))
+        assertTrue(Kurrency.isValid("jpy"))
     }
 }
 

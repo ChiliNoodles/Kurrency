@@ -10,9 +10,32 @@ import kotlin.js.ExperimentalWasmJsInterop
 private external fun getBrowserLocale(): String
 
 /**
+ * Gets the decimal separator for a given locale using Intl.NumberFormat
+ */
+@OptIn(ExperimentalWasmJsInterop::class)
+@JsFun("function(locale) { const formatted = new Intl.NumberFormat(locale).format(1.1); return formatted.replace(/[0-9]/g, '')[0] || '.'; }")
+private external fun getDecimalSeparatorForLocale(locale: String): String
+
+/**
+ * Gets the grouping separator for a given locale using Intl.NumberFormat
+ */
+@OptIn(ExperimentalWasmJsInterop::class)
+@JsFun("function(locale) { const formatted = new Intl.NumberFormat(locale).format(1111); return formatted.replace(/[0-9]/g, '')[0] || ','; }")
+private external fun getGroupingSeparatorForLocale(locale: String): String
+
+/**
  * Web (JS/WasmJs) implementation of KurrencyLocale using BCP 47 language tags.
  */
 actual class KurrencyLocale internal constructor(actual val languageTag: String) {
+
+    actual val decimalSeparator: Char
+        get() = getDecimalSeparatorForLocale(languageTag).firstOrNull() ?: '.'
+
+    actual val groupingSeparator: Char
+        get() = getGroupingSeparatorForLocale(languageTag).firstOrNull() ?: ','
+
+    actual val usesCommaAsDecimalSeparator: Boolean
+        get() = decimalSeparator == ','
 
     actual companion object {
         actual fun fromLanguageTag(languageTag: String): Result<KurrencyLocale> {
@@ -57,14 +80,8 @@ actual class KurrencyLocale internal constructor(actual val languageTag: String)
          * Basic validation for BCP 47 language tags.
          * Format: language[-script][-region][-variant]
          */
-        private fun isValidLanguageTag(tag: String): Boolean {
-            // Simple regex for BCP 47: language code (2-3 letters) optionally followed by subtags
-            val bcp47Pattern = Regex(
-                "^[a-z]{2,3}(-[A-Z][a-z]{3})?(-[A-Z]{2})?(-[0-9A-Za-z]+)*$",
-                RegexOption.IGNORE_CASE
-            )
-            return bcp47Pattern.matches(tag)
-        }
+        private fun isValidLanguageTag(tag: String): Boolean =
+            BCP47_LANGUAGE_TAG_REGEX.matches(tag)
     }
 
     override fun equals(other: Any?): Boolean {

@@ -4,72 +4,69 @@ import org.kimplify.cedar.logging.Cedar
 import org.kimplify.kurrency.extensions.replaceCommaWithDot
 
 expect class CurrencyFormatterImpl(kurrencyLocale: KurrencyLocale = KurrencyLocale.systemLocale()) : CurrencyFormat {
-    override fun getFractionDigits(currencyCode: String): Result<Int>
-    override fun formatCurrencyStyle(amount: String, currencyCode: String): Result<String>
-    override fun formatIsoCurrencyStyle(amount: String, currencyCode: String): Result<String>
+    override fun getFractionDigitsOrDefault(currencyCode: String, default: Int): Int
+    override fun formatCurrencyStyle(amount: String, currencyCode: String): String
+    override fun formatIsoCurrencyStyle(amount: String, currencyCode: String): String
 }
 
 expect fun isValidCurrency(currencyCode: String): Boolean
 
-object CurrencyFormatter {
-    private const val DEFAULT_FRACTION_DIGITS = 2
+/**
+ * CurrencyFormatter provides currency formatting functionality with locale support.
+ *
+ * Create instances with a specific locale for formatting operations:
+ * ```
+ * val formatter = CurrencyFormatter(KurrencyLocale.US)
+ * formatter.formatCurrencyStyleResult("100.50", "USD")
+ * ```
+ *
+ * Use companion object methods for locale-independent operations:
+ * ```
+ * CurrencyFormatter.getFractionDigits("USD") // Returns 2
+ * ```
+ */
+class CurrencyFormatter(private val locale: KurrencyLocale = KurrencyLocale.systemLocale()) : CurrencyFormat {
 
-    private val defaultFormatter: CurrencyFormat by lazy {
-        Cedar.tag("Kurrency").d("Initializing default CurrencyFormatter")
-        CurrencyFormatterImpl()
+    private val impl: CurrencyFormat by lazy {
+        Cedar.tag("Kurrency").d("Initializing CurrencyFormatter with locale: ${locale.languageTag}")
+        CurrencyFormatterImpl(locale)
+    }
+
+    override fun getFractionDigitsOrDefault(currencyCode: String, default: Int): Int =
+        impl.getFractionDigitsOrDefault(currencyCode, default)
+
+    override fun formatCurrencyStyle(amount: String, currencyCode: String): String =
+        formatCurrencyStyleResult(amount, currencyCode).getOrElse { amount }
+
+    override fun formatIsoCurrencyStyle(amount: String, currencyCode: String): String =
+        formatIsoCurrencyStyleResult(amount, currencyCode).getOrElse { amount }
+
+    /**
+     * Formats an amount in currency style using this formatter's locale.
+     *
+     * @param amount The amount to format
+     * @param currencyCode The ISO 4217 currency code (e.g., "USD", "EUR")
+     * @return Result containing the formatted string, or failure if validation fails
+     */
+    fun formatCurrencyStyleResult(amount: String, currencyCode: String): Result<String> {
+        return formatWithValidation(amount, currencyCode) {
+            Result.success(impl.formatCurrencyStyle(it, currencyCode))
+        }
     }
 
     /**
-     * Creates a new CurrencyFormat instance with the specified locale.
+     * Formats an amount in ISO currency style using this formatter's locale.
      *
-     * @param locale The locale to use for formatting. If null, uses the system default locale.
-     * @return A new CurrencyFormat instance
+     * @param amount The amount to format
+     * @param currencyCode The ISO 4217 currency code (e.g., "USD", "EUR")
+     * @return Result containing the formatted string with ISO code, or failure if validation fails
      */
-    fun create(locale: KurrencyLocale): CurrencyFormat {
-        Cedar.tag("Kurrency").d("Creating CurrencyFormatter with locale: ${locale?.languageTag ?: "system default"}")
-        return CurrencyFormatterImpl(locale)
-    }
-
-    /**
-     * Creates a new CurrencyFormat instance with the system's default locale.
-     *
-     * @return A new CurrencyFormat instance using system locale
-     */
-    fun createWithSystemLocale(): CurrencyFormat {
-        Cedar.tag("Kurrency").d("Creating CurrencyFormatter with system locale")
-        return CurrencyFormatterImpl(KurrencyLocale.systemLocale())
-    }
-
-    fun getFractionDigits(currencyCode: String): Result<Int> {
-        if (!isValidCurrencyCode(currencyCode)) {
-            val error = KurrencyError.InvalidCurrencyCode(currencyCode)
-            Cedar.tag("Kurrency").w(error.errorMessage)
-            return Result.failure(error)
-        }
-
-        Cedar.tag("Kurrency").d("Getting fraction digits for: $currencyCode")
-        return defaultFormatter.getFractionDigits(currencyCode)
-            .onFailure { throwable ->
-                val error = KurrencyError.FractionDigitsFailure(currencyCode, throwable)
-                Cedar.tag("Kurrency").e(throwable, error.errorMessage)
-            }
-    }
-
-    fun getFractionDigitsOrDefault(currencyCode: String): Int =
-        getFractionDigits(currencyCode).getOrDefault(DEFAULT_FRACTION_DIGITS)
-
-    fun formatCurrencyStyle(amount: String, currencyCode: String): Result<String> {
+    fun formatIsoCurrencyStyleResult(amount: String, currencyCode: String): Result<String> {
         return formatWithValidation(amount, currencyCode) {
-            defaultFormatter.formatCurrencyStyle(it, currencyCode)
+            Result.success(impl.formatIsoCurrencyStyle(it, currencyCode))
         }
     }
 
-    fun formatIsoCurrencyStyle(amount: String, currencyCode: String): Result<String> {
-        return formatWithValidation(amount, currencyCode) {
-            defaultFormatter.formatIsoCurrencyStyle(it, currencyCode)
-        }
-    }
-    
     private fun formatWithValidation(
         amount: String,
         currencyCode: String,
@@ -80,13 +77,13 @@ object CurrencyFormatter {
             Cedar.tag("Kurrency").w(error.errorMessage)
             return Result.failure(error)
         }
-        
+
         if (!isValidAmount(amount)) {
             val error = KurrencyError.InvalidAmount(amount)
             Cedar.tag("Kurrency").w(error.errorMessage)
             return Result.failure(error)
         }
-        
+
         Cedar.tag("Kurrency").d("Formatting: amount=$amount, currency=$currencyCode")
         return format(amount)
             .onFailure { throwable ->
@@ -94,11 +91,53 @@ object CurrencyFormatter {
                 Cedar.tag("Kurrency").e(throwable, error.errorMessage)
             }
     }
-    
-    private fun isValidCurrencyCode(code: String): Boolean = 
-        code.length == 3 && code.all { it.isLetter() }
-    
-    private fun isValidAmount(amount: String): Boolean = 
-        amount.isNotBlank() && amount.replaceCommaWithDot().toDoubleOrNull() != null
-}
 
+    companion object Companion {
+        private const val DEFAULT_FRACTION_DIGITS = 2
+        private val defaultFormatter: CurrencyFormat by lazy {
+            Cedar.tag("Kurrency").d("Initializing default CurrencyFormatter")
+            CurrencyFormatterImpl()
+        }
+
+        /**
+         * Gets the fraction digits for a currency code.
+         * Fraction digits are defined by ISO 4217 and do not vary by locale.
+         *
+         * @param currencyCode The ISO 4217 currency code (e.g., "USD", "EUR")
+         * @return Result containing the number of fraction digits, or failure if currency is invalid
+         */
+        fun getFractionDigits(currencyCode: String): Result<Int> {
+            val kurrency = Kurrency.fromCode(currencyCode).getOrElse { throwable ->
+                return Result.failure(throwable)
+            }
+
+            return runCatching {
+                val normalizedCode = kurrency.code.uppercase()
+                Cedar.tag("Kurrency").d("Getting fraction digits for: $normalizedCode")
+                defaultFormatter.getFractionDigitsOrDefault(normalizedCode, DEFAULT_FRACTION_DIGITS)
+            }.fold(
+                onSuccess = { Result.success(it) },
+                onFailure = { throwable ->
+                    val error = KurrencyError.FractionDigitsFailure(currencyCode, throwable)
+                    Cedar.tag("Kurrency").e(throwable, error.errorMessage)
+                    Result.failure(error)
+                }
+            )
+        }
+
+        /**
+         * Gets the fraction digits for a currency code, or returns default value.
+         *
+         * @param currencyCode The ISO 4217 currency code
+         * @return The number of fraction digits, or DEFAULT_FRACTION_DIGITS if there's an error
+         */
+        fun getFractionDigitsOrDefault(currencyCode: String): Int =
+            getFractionDigits(currencyCode).getOrDefault(DEFAULT_FRACTION_DIGITS)
+
+        private fun isValidCurrencyCode(code: String): Boolean =
+            code.length == 3 && code.all { it.isLetter() }
+
+        private fun isValidAmount(amount: String): Boolean =
+            amount.isNotBlank() && amount.replaceCommaWithDot().toDoubleOrNull() != null
+    }
+}

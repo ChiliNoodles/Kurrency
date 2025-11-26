@@ -7,6 +7,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import org.kimplify.kurrency.CurrencyFormat
 import org.kimplify.kurrency.CurrencyFormatter
 import org.kimplify.kurrency.KurrencyLocale
+import org.kimplify.kurrency.current
 
 /**
  * CompositionLocal for providing a default [CurrencyFormat] throughout the composition hierarchy.
@@ -23,7 +24,7 @@ import org.kimplify.kurrency.KurrencyLocale
  * ```
  */
 val LocalCurrencyFormatter = staticCompositionLocalOf<CurrencyFormat> {
-    CurrencyFormatter.createWithSystemLocale()
+    CurrencyFormatter()
 }
 
 /**
@@ -34,7 +35,7 @@ val LocalCurrencyFormatter = staticCompositionLocalOf<CurrencyFormat> {
  *
  * @param locale The locale to use for formatting. When this value changes, a new formatter
  *               will be created and composables will recompose.
- * @return A memoized CurrencyFormat instance
+ * @return A memoized formatter instance
  *
  * Example usage:
  * ```
@@ -44,7 +45,7 @@ val LocalCurrencyFormatter = staticCompositionLocalOf<CurrencyFormat> {
  *     val formatter = rememberCurrencyFormatter(locale = selectedLocale)
  *
  *     val formattedPrice = remember(amount, currencyCode) {
- *         formatter.formatCurrencyStyle(amount, currencyCode).getOrNull() ?: ""
+ *         formatter.formatCurrencyStyle(amount, currencyCode)
  *     }
  *
  *     Text(formattedPrice)
@@ -52,9 +53,9 @@ val LocalCurrencyFormatter = staticCompositionLocalOf<CurrencyFormat> {
  * ```
  */
 @Composable
-fun rememberCurrencyFormatter(locale: KurrencyLocale): CurrencyFormat {
+fun rememberCurrencyFormatter(locale: KurrencyLocale = KurrencyLocale.current()): CurrencyFormat {
     return remember(locale) {
-        CurrencyFormatter.create(locale)
+        CurrencyFormatter(locale)
     }
 }
 
@@ -64,7 +65,7 @@ fun rememberCurrencyFormatter(locale: KurrencyLocale): CurrencyFormat {
  * This is useful when you want to explicitly use the system locale and recreate
  * the formatter in response to system locale changes.
  *
- * @return A memoized CurrencyFormat instance using the system locale
+ * @return A memoized formatter instance using the system locale
  *
  * Example usage:
  * ```
@@ -72,7 +73,7 @@ fun rememberCurrencyFormatter(locale: KurrencyLocale): CurrencyFormat {
  * fun PriceDisplay(amount: String, currencyCode: String) {
  *     val formatter = rememberSystemCurrencyFormatter()
  *     val formattedPrice = remember(amount, currencyCode) {
- *         formatter.formatCurrencyStyle(amount, currencyCode).getOrNull() ?: ""
+ *         formatter.formatCurrencyStyle(amount, currencyCode)
  *     }
  *     Text(formattedPrice)
  * }
@@ -82,7 +83,7 @@ fun rememberCurrencyFormatter(locale: KurrencyLocale): CurrencyFormat {
 fun rememberSystemCurrencyFormatter(): CurrencyFormat {
     val systemLocale = KurrencyLocale.systemLocale()
     return remember(systemLocale) {
-        CurrencyFormatter.create(systemLocale)
+        CurrencyFormatter(systemLocale)
     }
 }
 
@@ -110,8 +111,8 @@ fun rememberSystemCurrencyFormatter(): CurrencyFormat {
  * @Composable
  * fun Screen1() {
  *     val formatter = LocalCurrencyFormatter.current
- *     val price = formatter.formatCurrencyStyle("100.50", "USD").getOrNull()
- *     Text(price ?: "")
+ *     val price = formatter.formatCurrencyStyle("100.50", "USD")
+ *     Text(price)
  * }
  * ```
  */

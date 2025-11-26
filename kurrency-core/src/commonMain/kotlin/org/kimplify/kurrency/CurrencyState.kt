@@ -15,37 +15,37 @@ class CurrencyState(
     initialCurrencyCode: String,
     initialAmount: String = "0.00"
 ) {
-    var currency by mutableStateOf(Currency(initialCurrencyCode))
+    var currency by mutableStateOf(Kurrency.fromCode(initialCurrencyCode).getOrElse { Kurrency.USD })
         private set
-    
+
     var amount by mutableStateOf(initialAmount)
         private set
-    
+
     val formattedAmountResult: Result<String>
         get() = currency.formatAmount(amount)
-    
+
     val formattedAmountIsoResult: Result<String>
         get() = currency.formatAmount(amount, CurrencyStyle.Iso)
-    
+
     val formattedAmount: String
         get() = formattedAmountResult.getOrDefault("")
-    
+
     val formattedAmountIso: String
         get() = formattedAmountIsoResult.getOrDefault("")
-    
+
     fun updateCurrency(currencyCode: String) {
         Cedar.tag("Kurrency").d("Updating currency: $currencyCode")
-        currency = Currency(currencyCode)
+        currency = Kurrency.fromCode(currencyCode).getOrElse { Kurrency.USD }
     }
-    
+
     fun updateAmount(newAmount: String) {
         Cedar.tag("Kurrency").d("Updating amount: $newAmount")
         amount = newAmount
     }
-    
+
     fun updateCurrencyAndAmount(currencyCode: String, newAmount: String) {
         Cedar.tag("Kurrency").d("Updating currency and amount: currency=$currencyCode, amount=$newAmount")
-        currency = Currency(currencyCode)
+        currency = Kurrency.fromCode(currencyCode).getOrElse { Kurrency.USD }
         amount = newAmount
     }
 }

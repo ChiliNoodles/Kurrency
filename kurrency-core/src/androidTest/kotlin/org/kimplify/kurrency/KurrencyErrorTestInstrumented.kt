@@ -74,20 +74,18 @@ class KurrencyErrorTestInstrumented {
     
     @Test
     fun testInvalidCurrencyCodeInResult() {
-        val currency = Currency("INVALID")
-        val result = currency.formatAmount("100.00")
-        
-        assertTrue(result.isFailure)
-        val error = result.exceptionOrNull()
+        val fromCodeResult = Kurrency.fromCode("INVALID")
+        assertTrue(fromCodeResult.isFailure)
+        val error = fromCodeResult.exceptionOrNull()
         assertTrue(error is KurrencyError.InvalidCurrencyCode)
         assertEquals("INVALID", (error as KurrencyError.InvalidCurrencyCode).code)
     }
-    
+
     @Test
     fun testInvalidAmountInResult() {
-        val currency = Currency("USD")
+        val currency = Kurrency.USD
         val result = currency.formatAmount("invalid")
-        
+
         assertTrue(result.isFailure)
         val error = result.exceptionOrNull()
         assertTrue(error is KurrencyError.InvalidAmount)

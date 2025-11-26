@@ -1,5 +1,6 @@
 package org.kimplify.kurrency
 
+import org.kimplify.cedar.logging.Cedar
 import org.kimplify.kurrency.extensions.replaceCommaWithDot
 import java.text.NumberFormat
 import java.util.Currency
@@ -10,33 +11,47 @@ actual class CurrencyFormatterImpl actual constructor(
 ) : CurrencyFormat {
 
     private val locale: Locale = kurrencyLocale.locale
-    
-    actual override fun getFractionDigits(currencyCode: String): Result<Int> {
+
+    actual override fun getFractionDigitsOrDefault(currencyCode: String, default: Int): Int {
         return runCatching {
             val currency = Currency.getInstance(currencyCode.uppercase())
             requireNotNull(currency) { "Currency instance is null for code: $currencyCode" }
             currency.defaultFractionDigits
+        }.getOrElse { throwable ->
+            Cedar.tag("Kurrency").w("Failed to get fraction digits for $currencyCode: ${throwable.message}")
+            default
         }
     }
-    
-    actual override fun formatCurrencyStyle(amount: String, currencyCode: String): Result<String> =
-        formatCurrency(amount, currencyCode, useIsoCode = false)
-    
-    actual override fun formatIsoCurrencyStyle(amount: String, currencyCode: String): Result<String> =
-        formatCurrency(amount, currencyCode, useIsoCode = true)
-    
-    private fun formatCurrency(
+
+    actual override fun formatCurrencyStyle(
+        amount: String,
+        currencyCode: String
+    ): String {
+        return formatCurrencyOrOriginal(amount, currencyCode, useIsoCode = false)
+    }
+
+    actual override fun formatIsoCurrencyStyle(
+        amount: String,
+        currencyCode: String
+    ): String {
+        return formatCurrencyOrOriginal(amount, currencyCode, useIsoCode = true)
+    }
+
+    private fun formatCurrencyOrOriginal(
         amount: String,
         currencyCode: String,
         useIsoCode: Boolean
-    ): Result<String> {
+    ): String {
         return runCatching {
-            val value = amount.replaceCommaWithDot().toDouble()
+            val normalizedAmount = amount.replaceCommaWithDot().trim()
+            if (normalizedAmount.isEmpty()) return amount
+
+            val value = normalizedAmount.toDouble()
             require(value.isFinite()) { "Amount must be a finite number" }
-            
+
             val currency = Currency.getInstance(currencyCode.uppercase())
             requireNotNull(currency) { "Currency instance is null for code: $currencyCode" }
-            
+
             if (useIsoCode) {
                 val numberFormat = NumberFormat.getNumberInstance(locale)
                 numberFormat.minimumFractionDigits = currency.defaultFractionDigits
@@ -46,6 +61,9 @@ actual class CurrencyFormatterImpl actual constructor(
                 val numberFormat = createNumberFormat(locale, currencyCode)
                 numberFormat.format(value) ?: ""
             }
+        }.getOrElse { throwable ->
+            Cedar.tag("Kurrency").w("Formatting failed for $currencyCode with amount $amount: ${throwable.message}")
+            amount
         }
     }
     

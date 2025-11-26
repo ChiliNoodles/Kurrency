@@ -7,9 +7,41 @@ package org.kimplify.kurrency
  * a consistent API for locale handling in Kurrency.
  *
  * @property languageTag The BCP 47 language tag (e.g., "en-US", "de-DE", "ja-JP")
+ * @property platformLocale The underlying platform-specific locale object
+ *   - Android/JVM: `java.util.Locale`
+ *   - iOS: `platform.Foundation.NSLocale`
+ *   - Web: `String` (language tag, used with Intl APIs)
  */
 expect class KurrencyLocale {
+
     val languageTag: String
+
+    /**
+     * The decimal separator character for this locale.
+     * For example: '.' for US English, ',' for German.
+     */
+    val decimalSeparator: Char
+
+    /**
+     * The grouping (thousands) separator character for this locale.
+     * For example: ',' for US English, '.' for German, ' ' for some locales.
+     */
+    val groupingSeparator: Char
+
+    /**
+     * Returns true if this locale uses comma as the decimal separator.
+     * This is a convenience property equivalent to `decimalSeparator == ','`.
+     *
+     * Useful for:
+     * - Input validation (accepting "100,50" vs "100.50")
+     * - Display formatting hints
+     * - Keyboard configuration
+     *
+     * Examples:
+     * - `true` for: de-DE, fr-FR, es-ES, it-IT, pt-BR, ru-RU, etc.
+     * - `false` for: en-US, en-GB, ja-JP, zh-CN, etc.
+     */
+    val usesCommaAsDecimalSeparator: Boolean
 
     companion object {
         /**
@@ -24,8 +56,6 @@ expect class KurrencyLocale {
          * Returns the system's current locale.
          */
         fun systemLocale(): KurrencyLocale
-
-        // Common predefined locales for convenience
 
         /** United States English (en-US) */
         val US: KurrencyLocale

@@ -1,6 +1,8 @@
 package org.kimplify.kurrency
 
 import platform.Foundation.NSLocale
+import platform.Foundation.NSLocaleDecimalSeparator
+import platform.Foundation.NSLocaleGroupingSeparator
 import platform.Foundation.currentLocale
 import platform.Foundation.localeIdentifier
 
@@ -11,6 +13,17 @@ actual class KurrencyLocale internal constructor(internal val nsLocale: NSLocale
     actual val languageTag: String
         get() = nsLocale.localeIdentifier.replace("_", "-")
 
+    actual val decimalSeparator: Char
+        get() = (nsLocale.objectForKey(NSLocaleDecimalSeparator) as? String)
+            ?.firstOrNull() ?: '.'
+
+    actual val groupingSeparator: Char
+        get() = (nsLocale.objectForKey(NSLocaleGroupingSeparator) as? String)
+            ?.firstOrNull() ?: ','
+
+    actual val usesCommaAsDecimalSeparator: Boolean
+        get() = decimalSeparator == ','
+
     actual companion object {
         actual fun fromLanguageTag(languageTag: String): Result<KurrencyLocale> {
             return try {
@@ -19,13 +32,7 @@ actual class KurrencyLocale internal constructor(internal val nsLocale: NSLocale
                     return Result.failure(IllegalArgumentException("Language tag cannot be blank"))
                 }
 
-                // Basic BCP 47 validation
-                val bcp47Pattern = Regex(
-                    "^[a-z]{2,3}(-[A-Z][a-z]{3})?(-[A-Z]{2})?(-[0-9A-Za-z]+)*$",
-                    RegexOption.IGNORE_CASE
-                )
-
-                if (!bcp47Pattern.matches(languageTag)) {
+                if (!BCP47_LANGUAGE_TAG_REGEX.matches(languageTag)) {
                     return Result.failure(IllegalArgumentException("Invalid language tag format: $languageTag"))
                 }
 

@@ -60,7 +60,7 @@ dependencies {
 import org.kimplify.kurrency.CurrencyFormatter
 
 // Using the singleton with system locale
-val result: Result<String> = CurrencyFormatter.formatCurrencyStyle("1234.56", "USD")
+val result: Result<String> = CurrencyFormatter.formatCurrencyStyleResult("1234.56", "USD")
 val formatted = result.getOrNull() // "$1,234.56" (in en-US locale)
 
 // Get fraction digits for a currency
@@ -71,12 +71,66 @@ val fractionDigits = CurrencyFormatter.getFractionDigits("USD").getOrNull() // 2
 
 ```kotlin
 // Standard currency format (with symbol)
-CurrencyFormatter.formatCurrencyStyle("1234.56", "USD")
+CurrencyFormatter.formatCurrencyStyleResult("1234.56", "USD")
 // Result: "$1,234.56" (US), "1.234,56 $" (DE)
 
 // ISO format (with currency code)
-CurrencyFormatter.formatIsoCurrencyStyle("1234.56", "USD")
+CurrencyFormatter.formatIsoCurrencyStyleResult("1234.56", "USD")
 // Result: "USD 1,234.56"
+```
+
+### Understanding Locale and Fraction Digits
+
+**Important**: Fraction digits are a property of the currency itself and do not vary by locale:
+- USD always has 2 fraction digits (whether formatted in US, Germany, or Japan)
+- JPY always has 0 fraction digits (whether formatted in US, Germany, or Japan)
+- BHD (Bahraini Dinar) always has 3 fraction digits
+
+What **does** vary by locale:
+- Decimal separator (`.` in US, `,` in Germany)
+- Grouping separator (`,` in US, `.` in Germany)
+- Currency symbol placement
+- Spacing around symbols
+
+```kotlin
+// Fraction digits are the same regardless of locale
+val usFraction = CurrencyFormatter.getFractionDigits("USD", KurrencyLocale.US)  // Returns 2
+val deFraction = CurrencyFormatter.getFractionDigits("USD", KurrencyLocale.GERMANY)  // Returns 2
+
+// But formatting differs by locale
+val usFormat = CurrencyFormatter.formatCurrencyStyleResult("1234.56", "USD", KurrencyLocale.US)
+// Result: "$1,234.56"
+
+val deFormat = CurrencyFormatter.formatCurrencyStyleResult("1234.56", "USD", KurrencyLocale.GERMANY)
+// Result: "1.234,56 $"
+```
+
+### Best Practice: Use Instance-Based API
+
+For consistency and clarity, prefer creating formatter instances:
+
+```kotlin
+val formatter = CurrencyFormatter(KurrencyLocale.GERMANY)
+val fractionDigits = formatter.getFractionDigits("USD")  // 2
+val formatted = formatter.formatCurrencyStyleResult("1234.56", "USD")  // "1.234,56 $"
+```
+
+### Working with Currency Data Class
+
+The `Currency` data class now requires explicit fraction digits:
+
+```kotlin
+// Create from currency code (recommended)
+val currency = Currency.fromCode("USD").getOrThrow()  // Currency(code="USD", fractionDigits=2)
+
+// Create with specific locale formatter
+val currency = Currency.fromCode("EUR", KurrencyLocale.GERMANY).getOrThrow()
+
+// Or provide fraction digits explicitly
+val currency = Currency("USD", 2)
+
+// Format amounts with the Currency object
+val formatted = currency.formatAmount("1234.56").getOrNull()  // Uses system locale
 ```
 
 ## Locale Management
@@ -88,14 +142,14 @@ import org.kimplify.kurrency.CurrencyFormatter
 import org.kimplify.kurrency.KurrencyLocale
 
 // Create formatters for specific locales
-val usFormatter = CurrencyFormatter.create(KurrencyLocale.US)
-val germanFormatter = CurrencyFormatter.create(KurrencyLocale.GERMANY)
-val japaneseFormatter = CurrencyFormatter.create(KurrencyLocale.JAPAN)
+val usFormatter = CurrencyFormatter(KurrencyLocale.US)
+val germanFormatter = CurrencyFormatter(KurrencyLocale.GERMANY)
+val japaneseFormatter = CurrencyFormatter(KurrencyLocale.JAPAN)
 
 // Format the same amount in different locales
-usFormatter.formatCurrencyStyle("1234.56", "USD")      // "$1,234.56"
-germanFormatter.formatCurrencyStyle("1234.56", "EUR")  // "1.234,56 €"
-japaneseFormatter.formatCurrencyStyle("1234.56", "JPY") // "¥1,235"
+usFormatter.formatCurrencyStyleResult("1234.56", "USD")      // "$1,234.56"
+germanFormatter.formatCurrencyStyleResult("1234.56", "EUR")  // "1.234,56 €"
+japaneseFormatter.formatCurrencyStyleResult("1234.56", "JPY") // "¥1,235"
 ```
 
 ### Available Predefined Locales
@@ -123,7 +177,7 @@ KurrencyLocale.INDIA           // hi-IN
 ```kotlin
 // Create locale from BCP 47 language tag
 val locale = KurrencyLocale.fromLanguageTag("de-AT").getOrNull() // German (Austria)
-val formatter = CurrencyFormatter.create(locale)
+val formatter = CurrencyFormatter(locale)
 ```
 
 ### System Locale
@@ -131,7 +185,7 @@ val formatter = CurrencyFormatter.create(locale)
 ```kotlin
 // Get the device's current locale
 val systemLocale = KurrencyLocale.systemLocale()
-val formatter = CurrencyFormatter.createWithSystemLocale()
+val formatter = CurrencyFormatter(KurrencyLocale.systemLocale())
 ```
 
 ### Integration with Compose Multiplatform Locale
@@ -144,7 +198,7 @@ import org.kimplify.kurrency.toKurrencyLocale
 fun MyComposable() {
     val composeLocale = Locale.current
     val kurrencyLocale = composeLocale.toKurrencyLocale().getOrNull()
-    val formatter = kurrencyLocale?.let { CurrencyFormatter.create(it) }
+    val formatter = kurrencyLocale?.let { CurrencyFormatter(it) }
 }
 ```
 
@@ -168,7 +222,7 @@ fun PriceDisplay(amount: String, currencyCode: String) {
     val formatter = rememberCurrencyFormatter(locale = selectedLocale)
 
     val formattedPrice = remember(amount, currencyCode) {
-        formatter.formatCurrencyStyle(amount, currencyCode).getOrNull() ?: ""
+        formatter.formatCurrencyStyleResult(amount, currencyCode).getOrNull() ?: ""
     }
 
     Column {
@@ -207,7 +261,7 @@ fun ProductScreen() {
     val formatter = LocalCurrencyFormatter.current
 
     val price = remember {
-        formatter.formatCurrencyStyle("99.99", "USD").getOrNull() ?: ""
+        formatter.formatCurrencyStyleResult("99.99", "USD").getOrNull() ?: ""
     }
 
     Text("Price: $price")
@@ -233,7 +287,7 @@ fun MultiCurrencyDisplay() {
     Column {
         prices.forEach { (currency, amount) ->
             val formatted = remember(locale, currency, amount) {
-                formatter.formatCurrencyStyle(amount, currency).getOrNull() ?: ""
+                formatter.formatCurrencyStyleResult(amount, currency).getOrNull() ?: ""
             }
             Text(formatted)
         }
@@ -252,15 +306,41 @@ fun MultiCurrencyDisplay() {
 ### CurrencyFormatter (Singleton)
 
 ```kotlin
-// Format with system locale
-CurrencyFormatter.formatCurrencyStyle(amount: String, currencyCode: String): Result<String>
-CurrencyFormatter.formatIsoCurrencyStyle(amount: String, currencyCode: String): Result<String>
+// Convenience methods with system locale
+CurrencyFormatter.formatCurrencyStyleResult(amount: String, currencyCode: String): Result<String>
+CurrencyFormatter.formatIsoCurrencyStyleResult(amount: String, currencyCode: String): Result<String>
 CurrencyFormatter.getFractionDigits(currencyCode: String): Result<Int>
 CurrencyFormatter.getFractionDigitsOrDefault(currencyCode: String): Int
 
-// Create instances with custom locales
-CurrencyFormatter.create(locale: KurrencyLocale? = null): CurrencyFormat
-CurrencyFormatter.createWithSystemLocale(): CurrencyFormat
+// Methods with explicit locale (recommended for locale-aware applications)
+CurrencyFormatter.formatCurrencyStyleResult(amount: String, currencyCode: String, locale: KurrencyLocale): Result<String>
+CurrencyFormatter.formatIsoCurrencyStyleResult(amount: String, currencyCode: String, locale: KurrencyLocale): Result<String>
+CurrencyFormatter.getFractionDigits(currencyCode: String, locale: KurrencyLocale): Result<Int>
+CurrencyFormatter.getFractionDigitsOrDefault(currencyCode: String, locale: KurrencyLocale): Int
+
+// Create instances with custom locales (recommended pattern)
+CurrencyFormatter(locale: KurrencyLocale): CurrencyFormat
+CurrencyFormatter(KurrencyLocale.systemLocale()): CurrencyFormat
+```
+
+### Currency (Data Class)
+
+```kotlin
+// Constructor (requires explicit fraction digits)
+Currency(code: String, fractionDigits: Int)
+
+// Factory methods (recommended)
+Currency.fromCode(code: String): Result<Currency>
+Currency.fromCode(code: String, locale: KurrencyLocale): Result<Currency>
+Currency.isValid(code: String): Boolean
+
+// Instance methods
+fun formatAmount(amount: String, style: CurrencyStyle = CurrencyStyle.Standard): Result<String>
+fun formatAmount(amount: Double, style: CurrencyStyle = CurrencyStyle.Standard): Result<String>
+fun formatAmountOrEmpty(amount: String, style: CurrencyStyle = CurrencyStyle.Standard): String
+fun formatAmountOrEmpty(amount: Double, style: CurrencyStyle = CurrencyStyle.Standard): String
+fun format(amount: String, style: CurrencyStyle = CurrencyStyle.Standard): FormattedCurrencyDelegate
+fun format(amount: Double, style: CurrencyStyle = CurrencyStyle.Standard): FormattedCurrencyDelegate
 ```
 
 ### CurrencyFormat (Interface)
@@ -268,8 +348,8 @@ CurrencyFormatter.createWithSystemLocale(): CurrencyFormat
 ```kotlin
 interface CurrencyFormat {
     fun getFractionDigits(currencyCode: String): Result<Int>
-    fun formatCurrencyStyle(amount: String, currencyCode: String): Result<String>
-    fun formatIsoCurrencyStyle(amount: String, currencyCode: String): Result<String>
+    fun formatCurrencyStyleResult(amount: String, currencyCode: String): Result<String>
+    fun formatIsoCurrencyStyleResult(amount: String, currencyCode: String): Result<String>
 }
 ```
 
@@ -323,9 +403,9 @@ fun KurrencyLocale.Companion.current(): KurrencyLocale
 All formatting methods return `Result<String>` for type-safe error handling:
 
 ```kotlin
-val formatter = CurrencyFormatter.create(KurrencyLocale.US)
+val formatter = CurrencyFormatter(KurrencyLocale.US)
 
-formatter.formatCurrencyStyle("1234.56", "USD")
+formatter.formatCurrencyStyleResult("1234.56", "USD")
     .onSuccess { formatted -> println(formatted) }
     .onFailure { error ->
         when (error) {

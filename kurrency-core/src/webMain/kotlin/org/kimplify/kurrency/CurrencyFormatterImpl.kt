@@ -2,6 +2,7 @@
 
 package org.kimplify.kurrency
 
+import org.kimplify.cedar.logging.Cedar
 import org.kimplify.kurrency.extensions.replaceCommaWithDot
 import kotlin.js.ExperimentalWasmJsInterop
 
@@ -29,7 +30,7 @@ actual class CurrencyFormatterImpl actual constructor(
 
     private val locale: String? = kurrencyLocale?.languageTag
 
-    actual override fun getFractionDigits(currencyCode: String): Result<Int> {
+    actual override fun getFractionDigitsOrDefault(currencyCode: String, default: Int): Int {
         return runCatching {
             val upperCode = currencyCode.uppercase()
             val resolvedCurrency = jsGetResolvedCurrency(upperCode, locale)
@@ -37,29 +38,44 @@ actual class CurrencyFormatterImpl actual constructor(
                 "Invalid currency code: $currencyCode (resolved to: $resolvedCurrency)"
             }
             val fractionDigits = jsGetMaxFractionDigits(upperCode, locale)
-            require(fractionDigits >= 0) { "Invalid fraction digits: $fractionDigits" }
-            fractionDigits
+            if (fractionDigits >= 0) fractionDigits else default
+        }.getOrElse { throwable ->
+            Cedar.tag("Kurrency").w("Failed to get fraction digits for $currencyCode: ${throwable.message}")
+            default
         }
     }
 
-    actual override fun formatCurrencyStyle(amount: String, currencyCode: String): Result<String> {
+    actual override fun formatCurrencyStyle(
+        amount: String,
+        currencyCode: String
+    ): String {
         return runCatching {
-            val normalizedAmount = amount.replaceCommaWithDot()
+            val normalizedAmount = amount.replaceCommaWithDot().trim()
+            if (normalizedAmount.isEmpty()) return amount
+
             val doubleValue = normalizedAmount.toDouble()
             require(doubleValue.isFinite()) { "Amount must be a finite number" }
             jsFormatSymbol(normalizedAmount, currencyCode, locale)
+        }.getOrElse { throwable ->
+            Cedar.tag("Kurrency").w("Formatting failed for $currencyCode with amount $amount: ${throwable.message}")
+            amount
         }
     }
 
     actual override fun formatIsoCurrencyStyle(
         amount: String,
         currencyCode: String
-    ): Result<String> {
+    ): String {
         return runCatching {
-            val normalizedAmount = amount.replaceCommaWithDot()
+            val normalizedAmount = amount.replaceCommaWithDot().trim()
+            if (normalizedAmount.isEmpty()) return amount
+
             val doubleValue = normalizedAmount.toDouble()
             require(doubleValue.isFinite()) { "Amount must be a finite number" }
             jsFormatIso(normalizedAmount, currencyCode, locale)
+        }.getOrElse { throwable ->
+            Cedar.tag("Kurrency").w("Formatting failed for $currencyCode with amount $amount: ${throwable.message}")
+            amount
         }
     }
 }
@@ -80,4 +96,3 @@ actual fun isValidCurrency(currencyCode: String): Boolean =
         val resolvedCurrency = jsGetResolvedCurrency(upperCode, null)
         resolvedCurrency == upperCode
     }.getOrDefault(false)
-

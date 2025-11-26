@@ -1,5 +1,6 @@
 package org.kimplify.kurrency
 
+import org.kimplify.cedar.logging.Cedar
 import org.kimplify.kurrency.extensions.replaceCommaWithDot
 import platform.Foundation.NSLocale
 import platform.Foundation.NSNumber
@@ -8,47 +9,61 @@ import platform.Foundation.NSNumberFormatterCurrencyISOCodeStyle
 import platform.Foundation.NSNumberFormatterCurrencyStyle
 import platform.Foundation.NSNumberFormatterStyle
 import platform.Foundation.commonISOCurrencyCodes
-import platform.Foundation.currentLocale
 
-actual class CurrencyFormatterImpl actual constructor(
-    kurrencyLocale: KurrencyLocale
-) : CurrencyFormat {
+actual class CurrencyFormatterImpl actual constructor(kurrencyLocale: KurrencyLocale) : CurrencyFormat {
 
-    private val locale: NSLocale = kurrencyLocale?.nsLocale ?: NSLocale.currentLocale
+    private val locale: NSLocale = kurrencyLocale.nsLocale
 
-    actual override fun getFractionDigits(currencyCode: String): Result<Int> {
+
+    actual override fun getFractionDigitsOrDefault(currencyCode: String, default: Int): Int {
         return runCatching {
             val formatter = NSNumberFormatter().apply {
                 this.currencyCode = currencyCode
                 this.numberStyle = NSNumberFormatterCurrencyStyle
             }
             val fractionDigits = formatter.maximumFractionDigits.toInt()
-            require(fractionDigits >= 0) { "Invalid fraction digits: $fractionDigits" }
-            fractionDigits
+            if (fractionDigits >= 0) fractionDigits else default
+        }.getOrElse { throwable ->
+            Cedar.tag("Kurrency").w("Failed to get fraction digits for $currencyCode: ${throwable.message}")
+            default
         }
     }
-    
-    actual override fun formatCurrencyStyle(amount: String, currencyCode: String): Result<String> =
-        formatCurrency(amount, currencyCode, NSNumberFormatterCurrencyStyle)
-    
-    actual override fun formatIsoCurrencyStyle(amount: String, currencyCode: String): Result<String> =
-        formatCurrency(amount, currencyCode, NSNumberFormatterCurrencyISOCodeStyle)
-    
-    private fun formatCurrency(
+
+    actual override fun formatCurrencyStyle(
+        amount: String,
+        currencyCode: String
+    ): String {
+        return formatCurrencyOrOriginal(amount, currencyCode, NSNumberFormatterCurrencyStyle)
+    }
+
+    actual override fun formatIsoCurrencyStyle(
+        amount: String,
+        currencyCode: String
+    ): String {
+        return formatCurrencyOrOriginal(amount, currencyCode, NSNumberFormatterCurrencyISOCodeStyle)
+    }
+
+    private fun formatCurrencyOrOriginal(
         amount: String,
         currencyCode: String,
         style: NSNumberFormatterStyle
-    ): Result<String> {
+    ): String {
         return runCatching {
-            val doubleValue = amount.replaceCommaWithDot().toDouble()
+            val normalizedAmount = amount.replaceCommaWithDot().trim()
+            if (normalizedAmount.isEmpty()) return amount
+
+            val doubleValue = normalizedAmount.toDouble()
             require(doubleValue.isFinite()) { "Amount must be a finite number" }
-            
+
             val value = NSNumber(doubleValue)
             val numberFormatter = createNumberFormatter(currencyCode, style)
             numberFormatter.stringFromNumber(value) ?: ""
+        }.getOrElse { throwable ->
+            Cedar.tag("Kurrency").w("Formatting failed for $currencyCode with amount $amount: ${throwable.message}")
+            amount
         }
     }
-    
+
     private fun createNumberFormatter(
         currencyCode: String,
         style: NSNumberFormatterStyle
@@ -63,4 +78,3 @@ actual fun isValidCurrency(currencyCode: String): Boolean {
     val upperCode = currencyCode.uppercase()
     return NSLocale.commonISOCurrencyCodes.contains(upperCode)
 }
-

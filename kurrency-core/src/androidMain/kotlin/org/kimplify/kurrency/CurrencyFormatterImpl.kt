@@ -2,6 +2,7 @@ package org.kimplify.kurrency
 
 import android.icu.text.NumberFormat
 import android.icu.util.Currency
+import org.kimplify.cedar.logging.Cedar
 import org.kimplify.kurrency.extensions.replaceCommaWithDot
 import java.math.BigDecimal
 import java.util.Locale
@@ -10,40 +11,41 @@ actual class CurrencyFormatterImpl actual constructor(kurrencyLocale: KurrencyLo
 
     private val platformLocale: Locale = kurrencyLocale.locale
 
-    actual override fun getFractionDigits(currencyCode: String): Result<Int> =
-        runCatching {
+    actual override fun getFractionDigitsOrDefault(currencyCode: String, default: Int): Int {
+        return runCatching {
             val currency = Currency.getInstance(currencyCode.uppercase())
             val fractionDigits = currency.defaultFractionDigits
-            require(fractionDigits >= 0) {
-                "Unsupported fraction digits for currency: $currencyCode"
-            }
-            fractionDigits
+            if (fractionDigits >= 0) fractionDigits else default
+        }.getOrElse { throwable ->
+            Cedar.tag("Kurrency").w("Failed to get fraction digits for $currencyCode: ${throwable.message}")
+            default
         }
+    }
 
     actual override fun formatCurrencyStyle(
         amount: String,
         currencyCode: String
-    ): Result<String> =
-        format(amount, currencyCode, NumberFormat.CURRENCYSTYLE)
+    ): String {
+        return formatOrOriginal(amount, currencyCode, NumberFormat.CURRENCYSTYLE)
+    }
 
     actual override fun formatIsoCurrencyStyle(
         amount: String,
         currencyCode: String
-    ): Result<String> =
-        format(amount, currencyCode, NumberFormat.ISOCURRENCYSTYLE)
+    ): String {
+        return formatOrOriginal(amount, currencyCode, NumberFormat.ISOCURRENCYSTYLE)
+    }
 
-    private fun format(
+    private fun formatOrOriginal(
         amount: String,
         currencyCode: String,
         style: Int
-    ): Result<String> =
-        runCatching {
+    ): String {
+        return runCatching {
             val currency = Currency.getInstance(currencyCode.uppercase())
 
             val normalized = amount.replaceCommaWithDot().trim()
-            require(normalized.isNotEmpty()) {
-                "Amount must not be blank"
-            }
+            if (normalized.isEmpty()) return amount
 
             val value = BigDecimal(normalized)
 
@@ -57,7 +59,11 @@ actual class CurrencyFormatterImpl actual constructor(kurrencyLocale: KurrencyLo
             }
 
             numberFormat.format(value)
+        }.getOrElse { throwable ->
+            Cedar.tag("Kurrency").w("Formatting failed for $currencyCode with amount $amount: ${throwable.message}")
+            amount
         }
+    }
 }
 
 actual fun isValidCurrency(currencyCode: String): Boolean {
@@ -67,7 +73,6 @@ actual fun isValidCurrency(currencyCode: String): Boolean {
 
     val upperCode = currencyCode.uppercase()
     return runCatching {
-        // Use Currency.getAvailableCurrencies() to get the valid currency codes
         val availableCurrencies = Currency.getAvailableCurrencies()
         availableCurrencies.any { it.currencyCode == upperCode }
     }.getOrDefault(false)
