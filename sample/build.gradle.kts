@@ -29,7 +29,13 @@ kotlin {
     jvm()
 
     js {
-        browser()
+        binaries.executable()
+        outputModuleName.set("composeApp")
+        browser {
+            commonWebpackConfig {
+                outputFileName = "composeApp.js"
+            }
+        }
         binaries.executable()
     }
 

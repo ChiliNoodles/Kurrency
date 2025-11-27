@@ -6,16 +6,16 @@ import org.kimplify.cedar.logging.Cedar
 import org.kimplify.kurrency.extensions.replaceCommaWithDot
 import kotlin.js.ExperimentalWasmJsInterop
 
-@JsFun("function(cur, loc) { return new Intl.NumberFormat(loc || undefined, {style:'currency', currency:cur}).resolvedOptions().maximumFractionDigits }")
+@JsFun("function(cur, loc) { return new Intl.NumberFormat(loc || undefined, {style:'currency', currency:cur}).resolvedOptions().maximumFractionDigits; }")
 private external fun jsGetMaxFractionDigits(cur: String, loc: String?): Int
 
-@JsFun("function(cur, loc) { return new Intl.NumberFormat(loc || undefined, {style:'currency', currency:cur}).resolvedOptions().currency }")
+@JsFun("function(cur, loc) { return new Intl.NumberFormat(loc || undefined, {style:'currency', currency:cur}).resolvedOptions().currency; }")
 private external fun jsGetResolvedCurrency(cur: String, loc: String?): String
 
-@JsFun("function(amt, cur, loc) { return new Intl.NumberFormat(loc || undefined, {style:'currency', currency:cur}).format(+amt) }")
+@JsFun("function(amt, cur, loc) { return new Intl.NumberFormat(loc || undefined, {style:'currency', currency:cur}).format(+amt); }")
 private external fun jsFormatSymbol(amt: String, cur: String, loc: String?): String
 
-@JsFun("function(amt, cur, loc) { return new Intl.NumberFormat(loc || undefined, {style:'currency', currency:cur, currencyDisplay:'code'}).format(+amt) }")
+@JsFun("function(amt, cur, loc) { return new Intl.NumberFormat(loc || undefined, {style:'currency', currency:cur, currencyDisplay:'code'}).format(+amt); }")
 private external fun jsFormatIso(amt: String, cur: String, loc: String?): String
 
 @JsFun("function(cur) { try { if (typeof Intl.supportedValuesOf === 'function') { return Intl.supportedValuesOf('currency').includes(cur); } return null; } catch(e) { return null; } }")
@@ -28,7 +28,7 @@ actual class CurrencyFormatterImpl actual constructor(
     kurrencyLocale: KurrencyLocale
 ) : CurrencyFormat {
 
-    private val locale: String? = kurrencyLocale?.languageTag
+    private val locale: String = kurrencyLocale.languageTag
 
     actual override fun getFractionDigitsOrDefault(currencyCode: String, default: Int): Int {
         return runCatching {

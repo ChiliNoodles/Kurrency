@@ -1,30 +1,38 @@
 package org.kimplify.kurrency
 
-import kotlin.js.ExperimentalWasmJsInterop
+external object Intl {
+    class NumberFormat(locales: String? = definedExternally, options: dynamic = definedExternally) {
+        fun format(number: Number): String
+    }
+}
 
 /**
  * Gets the browser's default locale from navigator.language
  */
-@OptIn(ExperimentalWasmJsInterop::class)
-@JsFun("function() { return navigator.language || 'en-US'; }")
-private external fun getBrowserLocale(): String
+private fun getBrowserLocale(): String {
+    return js("navigator.language || 'en-US'") as String
+}
 
 /**
  * Gets the decimal separator for a given locale using Intl.NumberFormat
  */
-@OptIn(ExperimentalWasmJsInterop::class)
-@JsFun("function(locale) { const formatted = new Intl.NumberFormat(locale).format(1.1); return formatted.replace(/[0-9]/g, '')[0] || '.'; }")
-private external fun getDecimalSeparatorForLocale(locale: String): String
+private fun getDecimalSeparatorForLocale(locale: String): String {
+    val formatter = Intl.NumberFormat(locale)
+    val formatted = formatter.format(1.1)
+    return formatted.replace(Regex("[0-9]"), "").firstOrNull()?.toString() ?: "."
+}
 
 /**
  * Gets the grouping separator for a given locale using Intl.NumberFormat
  */
-@OptIn(ExperimentalWasmJsInterop::class)
-@JsFun("function(locale) { const formatted = new Intl.NumberFormat(locale).format(1111); return formatted.replace(/[0-9]/g, '')[0] || ','; }")
-private external fun getGroupingSeparatorForLocale(locale: String): String
+private fun getGroupingSeparatorForLocale(locale: String): String {
+    val formatter = Intl.NumberFormat(locale)
+    val formatted = formatter.format(1111)
+    return formatted.replace(Regex("[0-9]"), "").firstOrNull()?.toString() ?: ","
+}
 
 /**
- * Web (JS/WasmJs) implementation of KurrencyLocale using BCP 47 language tags.
+ * Web (JS) implementation of KurrencyLocale using BCP 47 language tags.
  */
 actual class KurrencyLocale internal constructor(actual val languageTag: String) {
 
@@ -40,7 +48,6 @@ actual class KurrencyLocale internal constructor(actual val languageTag: String)
     actual companion object {
         actual fun fromLanguageTag(languageTag: String): Result<KurrencyLocale> {
             return try {
-                // Basic validation for BCP 47 format
                 if (languageTag.isBlank()) {
                     Result.failure(IllegalArgumentException("Language tag cannot be blank"))
                 } else if (!isValidLanguageTag(languageTag)) {
@@ -54,12 +61,10 @@ actual class KurrencyLocale internal constructor(actual val languageTag: String)
         }
 
         actual fun systemLocale(): KurrencyLocale {
-            // Get browser's default locale
             val browserLocale = getBrowserLocale()
             return KurrencyLocale(browserLocale)
         }
 
-        // Predefined locales
         actual val US: KurrencyLocale = KurrencyLocale("en-US")
         actual val UK: KurrencyLocale = KurrencyLocale("en-GB")
         actual val CANADA: KurrencyLocale = KurrencyLocale("en-CA")

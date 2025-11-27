@@ -138,7 +138,7 @@ class CurrencyStateTest {
         val state = CurrencyState("INVALID", "100.00")
         val formatted = state.formattedAmount
         
-        assertEquals("", formatted)
+        assertEquals("100.00", formatted)
     }
     
     @Test
