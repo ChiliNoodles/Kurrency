@@ -12,6 +12,7 @@ import androidx.compose.ui.text.intl.Locale
  * @param composeLocale The Compose locale to convert
  * @return KurrencyLocale instance
  */
+@Composable
 expect fun KurrencyLocale.Companion.fromComposeLocale(composeLocale: Locale): KurrencyLocale
 
 /**
@@ -19,28 +20,12 @@ expect fun KurrencyLocale.Companion.fromComposeLocale(composeLocale: Locale): Ku
  *
  * This is a Composable function that will recompose when the system locale changes.
  *
+ * On iOS, this will also recompose when formatting settings change (e.g., decimal separator).
+ *
  * @return KurrencyLocale representing the current system locale
  */
 @Composable
 fun KurrencyLocale.Companion.current(): KurrencyLocale {
     val composeLocale = Locale.current
-    return remember(composeLocale) {
-        fromComposeLocale(composeLocale)
-    }
-}
-
-/**
- * Extension function to convert a Compose Locale to a KurrencyLocale.
- *
- * Uses platform-specific direct conversion for zero overhead.
- *
- * Usage:
- * ```
- * val composeLocale = Locale.current
- * val kurrencyLocale = composeLocale.toKurrencyLocale()
- * val decimalSep = kurrencyLocale.decimalSeparator
- * ```
- */
-fun Locale.toKurrencyLocale(): KurrencyLocale {
-    return KurrencyLocale.fromComposeLocale(this)
+    return fromComposeLocale(composeLocale)
 }

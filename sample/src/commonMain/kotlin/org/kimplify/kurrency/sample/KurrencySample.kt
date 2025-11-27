@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import org.kimplify.kurrency.CurrencyStyle
 import org.kimplify.kurrency.ExperimentalKurrency
 import org.kimplify.kurrency.Kurrency
+import org.kimplify.kurrency.KurrencyLocale
+import org.kimplify.kurrency.current
 import org.kimplify.kurrency.rememberCurrencyState
 
 @Composable
@@ -57,6 +59,7 @@ fun KurrencySampleApp() {
                 ) {
                     HeaderSection()
                     BasicFormattingExample()
+                    LocaleSeparatorsExample()
                     CurrencyStateExample()
                     MultiCurrencyExample()
                     InteractiveCurrencyConverter()
@@ -111,6 +114,124 @@ private fun BasicFormattingExample() {
                 label = "Fraction Digits",
                 value = "${currency.fractionDigits} digits"
             )
+        }
+    }
+}
+
+@Composable
+private fun LocaleSeparatorsExample() {
+    SampleCard(title = "Locale Separators") {
+        val currentLocale = KurrencyLocale.current()
+        val locales = listOf(
+            "US" to KurrencyLocale.US,
+            "Germany" to KurrencyLocale.GERMANY,
+            "France" to KurrencyLocale.FRANCE,
+            "Spain" to KurrencyLocale.SPAIN,
+            "Brazil" to KurrencyLocale.BRAZIL,
+            "Japan" to KurrencyLocale.JAPAN
+        )
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            text = "Current Locale",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Text(
+                            text = "${currentLocale.languageTag} (with custom settings)",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(
+                            text = "Decimal: '${currentLocale.decimalSeparator}'",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Text(
+                            text = "Grouping: '${currentLocale.groupingSeparator}'",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+            Text(
+                text = "Predefined Locales:",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+
+            locales.forEach { (name, locale) ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = locale.languageTag,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(
+                            text = "Decimal: '${locale.decimalSeparator}'",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Grouping: '${locale.groupingSeparator}'",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+
+                if (name != locales.last().first) {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
+                }
+            }
         }
     }
 }

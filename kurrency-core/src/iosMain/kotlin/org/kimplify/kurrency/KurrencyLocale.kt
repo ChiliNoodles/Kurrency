@@ -10,16 +10,38 @@ import platform.Foundation.localeIdentifier
  * iOS implementation of KurrencyLocale using NSLocale.
  */
 actual class KurrencyLocale internal constructor(internal val nsLocale: NSLocale) {
+
+    /**
+     * Current system locale, used to get custom user preferences for separators
+     * when this locale matches the system locale.
+     */
+    private val currentLocale: NSLocale
+        get() = NSLocale.currentLocale
+
     actual val languageTag: String
         get() = nsLocale.localeIdentifier.replace("_", "-")
 
+    /**
+     * Gets the decimal separator for this locale.
+     * Uses currentLocale to respect custom user preferences (e.g., user set comma as decimal separator in iOS Settings).
+     */
     actual val decimalSeparator: Char
-        get() = (nsLocale.objectForKey(NSLocaleDecimalSeparator) as? String)
-            ?.firstOrNull() ?: '.'
+        get() {
+            val localeToUse = currentLocale
+            return (localeToUse.objectForKey(NSLocaleDecimalSeparator) as? String)
+                ?.firstOrNull() ?: '.'
+        }
 
+    /**
+     * Gets the grouping separator for this locale.
+     * Uses currentLocale to respect custom user preferences.
+     */
     actual val groupingSeparator: Char
-        get() = (nsLocale.objectForKey(NSLocaleGroupingSeparator) as? String)
-            ?.firstOrNull() ?: ','
+        get() {
+            val localeToUse = currentLocale
+            return (localeToUse.objectForKey(NSLocaleGroupingSeparator) as? String)
+                ?.firstOrNull() ?: ','
+        }
 
     actual val usesCommaAsDecimalSeparator: Boolean
         get() = decimalSeparator == ','
@@ -27,7 +49,6 @@ actual class KurrencyLocale internal constructor(internal val nsLocale: NSLocale
     actual companion object {
         actual fun fromLanguageTag(languageTag: String): Result<KurrencyLocale> {
             return try {
-                // Validate format before creating locale
                 if (languageTag.isBlank()) {
                     return Result.failure(IllegalArgumentException("Language tag cannot be blank"))
                 }
@@ -36,7 +57,6 @@ actual class KurrencyLocale internal constructor(internal val nsLocale: NSLocale
                     return Result.failure(IllegalArgumentException("Invalid language tag format: $languageTag"))
                 }
 
-                // NSLocale uses underscores, so convert hyphens to underscores
                 val localeIdentifier = languageTag.replace("-", "_")
                 val locale = NSLocale(localeIdentifier = localeIdentifier)
                 Result.success(KurrencyLocale(locale))
@@ -53,7 +73,8 @@ actual class KurrencyLocale internal constructor(internal val nsLocale: NSLocale
         actual val US: KurrencyLocale = KurrencyLocale(NSLocale(localeIdentifier = "en_US"))
         actual val UK: KurrencyLocale = KurrencyLocale(NSLocale(localeIdentifier = "en_GB"))
         actual val CANADA: KurrencyLocale = KurrencyLocale(NSLocale(localeIdentifier = "en_CA"))
-        actual val CANADA_FRENCH: KurrencyLocale = KurrencyLocale(NSLocale(localeIdentifier = "fr_CA"))
+        actual val CANADA_FRENCH: KurrencyLocale =
+            KurrencyLocale(NSLocale(localeIdentifier = "fr_CA"))
         actual val GERMANY: KurrencyLocale = KurrencyLocale(NSLocale(localeIdentifier = "de_DE"))
         actual val FRANCE: KurrencyLocale = KurrencyLocale(NSLocale(localeIdentifier = "fr_FR"))
         actual val ITALY: KurrencyLocale = KurrencyLocale(NSLocale(localeIdentifier = "it_IT"))
@@ -63,7 +84,8 @@ actual class KurrencyLocale internal constructor(internal val nsLocale: NSLocale
         actual val KOREA: KurrencyLocale = KurrencyLocale(NSLocale(localeIdentifier = "ko_KR"))
         actual val BRAZIL: KurrencyLocale = KurrencyLocale(NSLocale(localeIdentifier = "pt_BR"))
         actual val RUSSIA: KurrencyLocale = KurrencyLocale(NSLocale(localeIdentifier = "ru_RU"))
-        actual val SAUDI_ARABIA: KurrencyLocale = KurrencyLocale(NSLocale(localeIdentifier = "ar_SA"))
+        actual val SAUDI_ARABIA: KurrencyLocale =
+            KurrencyLocale(NSLocale(localeIdentifier = "ar_SA"))
         actual val INDIA: KurrencyLocale = KurrencyLocale(NSLocale(localeIdentifier = "hi_IN"))
     }
 
