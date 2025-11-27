@@ -6,7 +6,5 @@ import org.kimplify.kurrency.sample.App
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-    ComposeViewport {
-        App()
-    }
+    ComposeViewport { App() }
 }
