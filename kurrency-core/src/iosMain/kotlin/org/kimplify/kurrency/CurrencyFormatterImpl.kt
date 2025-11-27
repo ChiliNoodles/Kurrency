@@ -9,10 +9,18 @@ import platform.Foundation.NSNumberFormatterCurrencyISOCodeStyle
 import platform.Foundation.NSNumberFormatterCurrencyStyle
 import platform.Foundation.NSNumberFormatterStyle
 import platform.Foundation.commonISOCurrencyCodes
+import platform.Foundation.currentLocale
 
-actual class CurrencyFormatterImpl actual constructor(kurrencyLocale: KurrencyLocale) : CurrencyFormat {
+actual class CurrencyFormatterImpl actual constructor(private val kurrencyLocale: KurrencyLocale) : CurrencyFormat {
 
-    private val locale: NSLocale = kurrencyLocale.nsLocale
+    /**
+     * On iOS, we use NSLocale.currentLocale for formatting to respect user's
+     * custom formatting preferences (decimal/grouping separators).
+     *
+     * The kurrencyLocale is kept for potential language/region context validation.
+     */
+    private val formattingLocale: NSLocale
+        get() = NSLocale.currentLocale
 
 
     actual override fun getFractionDigitsOrDefault(currencyCode: String, default: Int): Int {
@@ -69,7 +77,7 @@ actual class CurrencyFormatterImpl actual constructor(kurrencyLocale: KurrencyLo
         style: NSNumberFormatterStyle
     ): NSNumberFormatter = NSNumberFormatter().apply {
         this.numberStyle = style
-        this.locale = this@CurrencyFormatterImpl.locale
+        this.locale = formattingLocale
         this.currencyCode = currencyCode
     }
 }

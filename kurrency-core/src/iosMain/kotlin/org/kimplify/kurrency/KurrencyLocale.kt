@@ -11,37 +11,26 @@ import platform.Foundation.localeIdentifier
  */
 actual class KurrencyLocale internal constructor(internal val nsLocale: NSLocale) {
 
-    /**
-     * Current system locale, used to get custom user preferences for separators
-     * when this locale matches the system locale.
-     */
-    private val currentLocale: NSLocale
-        get() = NSLocale.currentLocale
-
     actual val languageTag: String
         get() = nsLocale.localeIdentifier.replace("_", "-")
 
     /**
-     * Gets the decimal separator for this locale.
-     * Uses currentLocale to respect custom user preferences (e.g., user set comma as decimal separator in iOS Settings).
+     * Returns the standard decimal separator for this locale.
+     * This is the locale's default, NOT the user's custom preference.
+     * For formatting with custom preferences, use CurrencyFormatter.
      */
     actual val decimalSeparator: Char
-        get() {
-            val localeToUse = currentLocale
-            return (localeToUse.objectForKey(NSLocaleDecimalSeparator) as? String)
-                ?.firstOrNull() ?: '.'
-        }
+        get() = (nsLocale.objectForKey(NSLocaleDecimalSeparator) as? String)
+            ?.firstOrNull() ?: '.'
 
     /**
-     * Gets the grouping separator for this locale.
-     * Uses currentLocale to respect custom user preferences.
+     * Returns the standard grouping separator for this locale.
+     * This is the locale's default, NOT the user's custom preference.
+     * For formatting with custom preferences, use CurrencyFormatter.
      */
     actual val groupingSeparator: Char
-        get() {
-            val localeToUse = currentLocale
-            return (localeToUse.objectForKey(NSLocaleGroupingSeparator) as? String)
-                ?.firstOrNull() ?: ','
-        }
+        get() = (nsLocale.objectForKey(NSLocaleGroupingSeparator) as? String)
+            ?.firstOrNull() ?: ','
 
     actual val usesCommaAsDecimalSeparator: Boolean
         get() = decimalSeparator == ','
