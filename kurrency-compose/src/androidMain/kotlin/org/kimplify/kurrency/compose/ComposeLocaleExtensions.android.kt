@@ -1,16 +1,12 @@
-package org.kimplify.kurrency
+package org.kimplify.kurrency.compose
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.text.intl.Locale
+import org.kimplify.kurrency.KurrencyLocale
 
 /**
  * Android implementation: Uses platformLocale for direct native locale access.
  * Zero overhead - no string conversion or parsing.
  */
-@Composable
 actual fun KurrencyLocale.Companion.fromComposeLocale(composeLocale: Locale): KurrencyLocale {
-    return remember(composeLocale) {
-        KurrencyLocale(composeLocale.platformLocale)
-    }
+    return KurrencyLocale(composeLocale.platformLocale)
 }

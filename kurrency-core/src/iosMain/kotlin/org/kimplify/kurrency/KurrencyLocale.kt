@@ -9,7 +9,7 @@ import platform.Foundation.localeIdentifier
 /**
  * iOS implementation of KurrencyLocale using NSLocale.
  */
-actual class KurrencyLocale internal constructor(internal val nsLocale: NSLocale) {
+actual class KurrencyLocale(internal val nsLocale: NSLocale) {
 
     actual val languageTag: String
         get() = nsLocale.localeIdentifier.replace("_", "-")

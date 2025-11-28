@@ -39,7 +39,7 @@ import org.kimplify.kurrency.CurrencyStyle
 import org.kimplify.kurrency.ExperimentalKurrency
 import org.kimplify.kurrency.Kurrency
 import org.kimplify.kurrency.KurrencyLocale
-import org.kimplify.kurrency.current
+import org.kimplify.kurrency.compose.current
 import org.kimplify.kurrency.rememberCurrencyState
 
 @Composable

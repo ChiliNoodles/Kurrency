@@ -19,7 +19,7 @@ expect fun getGroupingSeparatorForLocale(locale: String): String
 /**
  * Web (JS/WasmJs) implementation of KurrencyLocale using BCP 47 language tags.
  */
-actual class KurrencyLocale internal constructor(actual val languageTag: String) {
+actual class KurrencyLocale(actual val languageTag: String) {
 
     actual val decimalSeparator: Char
         get() = getDecimalSeparatorForLocale(languageTag).firstOrNull() ?: '.'

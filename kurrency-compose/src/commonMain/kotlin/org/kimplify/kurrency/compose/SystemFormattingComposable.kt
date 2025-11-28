@@ -1,6 +1,7 @@
-package org.kimplify.kurrency
+package org.kimplify.kurrency.compose
 
 import androidx.compose.runtime.Composable
+import org.kimplify.kurrency.KurrencyLocale
 
 /**
  * Composable that provides current system formatting preferences.

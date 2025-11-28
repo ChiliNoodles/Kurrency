@@ -68,6 +68,7 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(kotlin("test"))
             api(project(":kurrency-core"))
+            api(project(":kurrency-compose"))
         }
 
         androidMain.dependencies {

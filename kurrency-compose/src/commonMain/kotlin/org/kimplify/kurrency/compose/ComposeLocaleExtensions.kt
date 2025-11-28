@@ -1,7 +1,8 @@
-package org.kimplify.kurrency
+package org.kimplify.kurrency.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.intl.Locale
+import org.kimplify.kurrency.KurrencyLocale
 
 /**
  * Creates a [org.kimplify.kurrency.KurrencyLocale] from a Jetpack Compose Multiplatform [Locale].
@@ -11,11 +12,10 @@ import androidx.compose.ui.text.intl.Locale
  * @param composeLocale The Compose locale to convert
  * @return KurrencyLocale instance
  */
-@Composable
 expect fun KurrencyLocale.Companion.fromComposeLocale(composeLocale: Locale): KurrencyLocale
 
 /**
- * Creates a [org.kimplify.kurrency.KurrencyLocale] from the current Compose system locale.
+ * Creates a [KurrencyLocale] from the current Compose system locale.
  *
  * This is a Composable function that will recompose when the system locale changes.
  *

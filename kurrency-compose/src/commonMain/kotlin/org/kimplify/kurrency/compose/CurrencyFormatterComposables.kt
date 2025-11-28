@@ -7,7 +7,6 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import org.kimplify.kurrency.CurrencyFormat
 import org.kimplify.kurrency.CurrencyFormatter
 import org.kimplify.kurrency.KurrencyLocale
-import org.kimplify.kurrency.current
 
 /**
  * CompositionLocal for providing a default [CurrencyFormat] throughout the composition hierarchy.
